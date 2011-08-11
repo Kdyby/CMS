@@ -1,0 +1,36 @@
+CMF Kdyby-Common
+==================
+
+Current version: 8.1-dev
+
+Common libraries of Content Managing Framework (CMF) Kdyby
+
+
+WARNING:
+========
+
+This package is under active development, and shouldn't be used at all!
+
+It's safe and permitted to copy & paste & use & learn how solve things the bad way,
+but for Christ sake don't use it in your live applications!
+
+
+Dependecies:
+============
+
+- Nette 2.0b https://github.com/nette/nette
+- Kdyby Framework https://github.com/kdyby/Framework
+- Doctrine ORM 2.1.0RC1 https://github.com/doctrine/doctrine2
+- Doctrine DBAL https://github.com/doctrine/dbal
+- Doctrine Common https://github.com/doctrine/common
+- Symfony2 Validator https://github.com/symfony/symfony/tree/master/src/Symfony/Component/Validator
+
+
+Optional dependencies
+=====================
+
+- Doctrine Migrations https://github.com/doctrine/migrations
+- Doctrine CouchDB ODM https://github.com/doctrine/couchdb-odm
+- Gedmo Doctrine extensions https://github.com/l3pp4rd/DoctrineExtensions
+- Beberlei Doctrine extensions https://github.com/beberlei/DoctrineExtensions
+- Symfony2 Console https://github.com/symfony/symfony/tree/master/src/Symfony/Component/Console

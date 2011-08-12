@@ -11,6 +11,7 @@
 namespace Kdyby\Modules;
 
 use Kdyby;
+use Kdyby\Loaders\RobotLoader;
 use Nette;
 use Nette\Caching\Cache;
 use Nette\Iterators\Filter;
@@ -25,7 +26,7 @@ class InstallWizard extends Nette\Object
 
 	const CACHE_NS = 'Kdyby.Modules.Installers';
 
-	/** @var Nette\Loaders\RobotLoader */
+	/** @var RobotLoader */
 	private $robotLoader;
 
 	/** @var Cache */
@@ -37,9 +38,9 @@ class InstallWizard extends Nette\Object
 
 
 	/**
-	 * @param Nette\Loaders\RobotLoader $loader
+	 * @param RobotLoader $loader
 	 */
-	public function __construct(Nette\Loaders\RobotLoader $loader, Nette\Caching\IStorage $storage)
+	public function __construct(RobotLoader $loader, Nette\Caching\IStorage $storage)
 	{
 		$this->robotLoader = $loader;
 		$this->cache = new Cache($storage, self::CACHE_NS);
@@ -90,20 +91,11 @@ class InstallWizard extends Nette\Object
 	/**
 	 * @return array
 	 */
-	public function doSearchInstallers()
+	private function doSearchInstallers()
 	{
-		$classes = new \ArrayIterator($this->robotLoader->getIndexedClasses());
-		$installers = new Filter($classes, function (Filter $iterator) {
-			$class = $iterator->getInnerIterator()->key();
-			if (!class_exists($class)) {
-				return FALSE;
-			}
-
-			$classRef = Nette\Reflection\ClassType::from($iterator->getInnerIterator()->key());
-			return in_array('Kdyby\Modules\IInstaller', $classRef->getInterfaceNames());
-		});
-
-		return array_keys(iterator_to_array($installers));
+		return $this->robotLoader->createIndexFilter()
+			->implementsInterface('Kdyby\Modules\IInstaller')
+			->getResult();
 	}
 
 }

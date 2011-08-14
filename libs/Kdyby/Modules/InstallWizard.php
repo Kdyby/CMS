@@ -95,6 +95,7 @@ class InstallWizard extends Nette\Object
 	{
 		return $this->robotLoader->createIndexFilter()
 			->implementsInterface('Kdyby\Modules\IInstaller')
+			->isInstantiable()
 			->getResult();
 	}
 

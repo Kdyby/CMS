@@ -7,6 +7,7 @@ define('APP_DIR', __DIR__);
 define('TESTS_DIR', __DIR__);
 define('VENDORS_DIR', APP_DIR . '/../libs/vendors');
 define('LIBS_DIR', VENDORS_DIR);
+define('KDYBY_CMS_DIR', __DIR__ . '/../libs/Kdyby');
 
 // Take care of autoloading
 require_once VENDORS_DIR . '/autoload.php';

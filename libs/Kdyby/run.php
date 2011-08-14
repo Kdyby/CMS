@@ -12,8 +12,8 @@
 
 define('KDYBY_CMS_DIR', __DIR__);
 
-// Load Kdyby Framework
-require LIBS_DIR . '/Kdyby/loader.php';
+// Register CMS
+$configurator->registerCMS();
 
 // Load config
 $container = $configurator->loadConfig(APP_DIR . '/config.neon');

@@ -8,9 +8,10 @@ if (is_dir(VENDORS_DIR . '/nette')) {
 # Kdyby Framework
 if (is_dir(VENDORS_DIR . '/kdyby-framework')) {
 	require_once VENDORS_DIR . '/kdyby-framework/libs/Kdyby/loader.php';
+	$configurator->registerCMS();
 }
 
-# Texy! 
+# Texy!
 if (is_dir(VENDORS_DIR . '/texy')) {
 	require_once VENDORS_DIR . '/texy/Texy/Texy.php';
 }

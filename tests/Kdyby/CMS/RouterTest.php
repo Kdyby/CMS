@@ -49,10 +49,10 @@ class RouterTest extends Kdyby\Testing\Test
 				$this->createParams(array()),
 			), array(
 				'http://www.kdyby.org/cs',
-				$this->createParams(array('lang' => 'cs')),
+				$this->createParams(array('language' => 'cs')),
 			), array(
 				'http://www.kdyby.org/cs/',
-				$this->createParams(array('lang' => 'cs')),
+				$this->createParams(array('language' => 'cs')),
 			), array(
 				'http://www.kdyby.org/contact',
 				$this->createParams(array('path' => 'contact'), NULL),
@@ -61,10 +61,10 @@ class RouterTest extends Kdyby\Testing\Test
 				$this->createParams(array('path' => 'contact'), NULL),
 			), array(
 				'http://www.kdyby.org/cs/contact',
-				$this->createParams(array('lang' => 'cs', 'path' => 'contact'), NULL),
+				$this->createParams(array('language' => 'cs', 'path' => 'contact'), NULL),
 			), array(
 				'http://www.kdyby.org/cs/contact/',
-				$this->createParams(array('lang' => 'cs', 'path' => 'contact'), NULL),
+				$this->createParams(array('language' => 'cs', 'path' => 'contact'), NULL),
 			), array(
 				'http://www.kdyby.org/articles/kdyby-cms-is-great',
 				$this->createParams(array('path' => 'articles/kdyby-cms-is-great'), NULL),
@@ -73,10 +73,10 @@ class RouterTest extends Kdyby\Testing\Test
 				$this->createParams(array('path' => 'articles/kdyby-cms-is-great'), NULL),
 			), array(
 				'http://www.kdyby.org/cs/articles/kdyby-cms-is-great',
-				$this->createParams(array('lang' => 'cs', 'path' => 'articles/kdyby-cms-is-great'), NULL),
+				$this->createParams(array('language' => 'cs', 'path' => 'articles/kdyby-cms-is-great'), NULL),
 			), array(
 				'http://www.kdyby.org/cs/articles/kdyby-cms-is-great/',
-				$this->createParams(array('lang' => 'cs', 'path' => 'articles/kdyby-cms-is-great'), NULL),
+				$this->createParams(array('language' => 'cs', 'path' => 'articles/kdyby-cms-is-great'), NULL),
 			)
 		);
 	}
@@ -102,7 +102,7 @@ class RouterTest extends Kdyby\Testing\Test
 	private function createParams(array $params, $node = NULL)
 	{
 		$node = func_num_args()>1 ? array('node' => $node) : array();
-		return $node + $params + array('action' => 'default', 'path' => NULL, 'lang' => NULL, 'extension' => 'html', 'foo' => 1, 'bar' => 2);
+		return $node + $params + array('action' => 'default', 'path' => NULL, 'language' => NULL, 'extension' => 'html', 'foo' => 1, 'bar' => 2);
 	}
 
 

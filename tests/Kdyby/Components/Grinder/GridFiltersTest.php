@@ -21,7 +21,7 @@ require_once KDYBY_FRAMEWORK_DIR . '/Application/UI/Form.php';
 /**
  * @author Filip Procházka
  */
-class GridFiltersTest extends Kdyby\Testing\Test
+class GridFiltersTest extends Kdyby\Testing\TestCase
 {
 
 	/** @var Grinder\Grid */

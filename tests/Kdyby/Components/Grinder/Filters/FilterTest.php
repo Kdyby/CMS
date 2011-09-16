@@ -20,7 +20,7 @@ use Nette;
 /**
  * @author Filip Procházka
  */
-class FilterTest extends Kdyby\Testing\Test
+class FilterTest extends Kdyby\Testing\TestCase
 {
 
 	/** @var Grinder\Filters\FiltersMap */

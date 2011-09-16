@@ -19,7 +19,7 @@ use Nette\Http;
 /**
  * @author Filip Procházka
  */
-class RouterTest extends Kdyby\Testing\Test
+class RouterTest extends Kdyby\Testing\TestCase
 {
 
 	/** @var Kdyby\CMS\Router */

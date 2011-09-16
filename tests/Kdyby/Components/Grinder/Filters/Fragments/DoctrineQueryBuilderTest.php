@@ -21,7 +21,7 @@ use Nette;
 /**
  * @author Filip Procházka
  */
-class DoctrineQueryBuilderTest extends Kdyby\Testing\Test
+class DoctrineQueryBuilderTest extends Kdyby\Testing\TestCase
 {
 
 	/** @var Filters\Fragments\DoctrineQueryBuilder */

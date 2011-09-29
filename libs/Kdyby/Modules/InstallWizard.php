@@ -20,6 +20,8 @@ use Nette\Iterators\Filter;
 
 /**
  * @author Filip Procházka
+ *
+ * @todo delete this shit and make package manager
  */
 class InstallWizard extends Nette\Object
 {

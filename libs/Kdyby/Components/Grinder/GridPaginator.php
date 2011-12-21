@@ -28,6 +28,9 @@ class GridPaginator extends Kdyby\Components\VisualPaginator\ComponentPaginator
 {
 
 	/** @persistent int */
+	public $page = 1;
+
+	/** @persistent int */
 	public $itemsPerPage = 20;
 
 	/** @var array */
@@ -52,9 +55,6 @@ class GridPaginator extends Kdyby\Components\VisualPaginator\ComponentPaginator
 		$itemsPerPage = in_array($this->itemsPerPage, $this->getAllowedSteps()) ? $this->itemsPerPage : 20;
 		if ($itemsPerPage !== 'all') {
 			$this->getPaginator()->setItemsPerPage($itemsPerPage);
-
-		} else {
-			$this->getGrid()->page = 1;
 		}
 	}
 
@@ -67,7 +67,7 @@ class GridPaginator extends Kdyby\Components\VisualPaginator\ComponentPaginator
 	public function loadState(array $params)
 	{
 		parent::loadState($params);
-		$this->setPage($this->getGrid()->page);
+		$this->setPage($this->page);
 	}
 
 

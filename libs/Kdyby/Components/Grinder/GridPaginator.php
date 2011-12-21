@@ -164,7 +164,7 @@ class GridPaginator extends Kdyby\Components\VisualPaginator\ComponentPaginator
 	 */
 	public function renderBottom()
 	{
-		if ($this->isOnTop()) {
+		if ($this->isOnBottom()) {
 			$this->render();
 		}
 	}

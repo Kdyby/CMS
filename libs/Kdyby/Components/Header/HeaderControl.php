@@ -55,7 +55,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	/** @var array */
 	private $meta = array(
 		'content-type' => array('http-equiv' => 'Content-Type', 'content' => 'text/html; charset=utf-8'),
-		'robots' => array('name' => 'robots', 'content' => 'noindex')
+		// 'robots' => array('name' => 'robots', 'content' => 'noindex')
 	);
 
 	/** @var \Nette\ComponentModel\IContainer */
@@ -73,8 +73,6 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 */
 	public function __construct(Application $application, FormulaeManager $formulaeManager, Http\Request $httpRequest)
 	{
-		parent::__construct();
-
 		$this->formulaeManager = $formulaeManager;
 		$this->httpRequest = $httpRequest;
 		$application->onShutdown[] = function () use ($formulaeManager) {
@@ -99,6 +97,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 
 	/**
 	 * @param string $path
+	 *
 	 * @return string
 	 */
 	protected function absolutePath($path)
@@ -126,6 +125,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 * @param array|string $title
 	 * @param bool $reverse
 	 * @param string $separator
+	 *
 	 * @return \Kdyby\Components\HeaderControl
 	 */
 	public function setTitle($title, $reverse = NULL, $separator = NULL)
@@ -150,7 +150,11 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 */
 	public function addTitle($title)
 	{
-		$this->title = array_merge($this->title, array($title));
+		if (!$this->title) {
+			$this->title = (array)$this->defaultTitle;
+		}
+
+		$this->title = array_merge($this->title, (array)$title);
 		return $this;
 	}
 
@@ -162,7 +166,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	public function getTitle()
 	{
 		$titleEl = clone $this->titleEl;
-		$title = $this->title ?: $this->defaultTitle;
+		$title = (array)($this->title ?: $this->defaultTitle);
 		$title = $this->titleReverse ? array_reverse($title) : $title;
 		return $titleEl->setText(implode(' ' . $this->titleSeparator . ' ', $title));
 	}
@@ -191,6 +195,10 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 */
 	public function setFavicon($favicon)
 	{
+		if ($favicon instanceof Html) {
+			return $this->addTag($favicon);
+		}
+
 		$faviconEl = Html::el('link')
 			->rel('shortcut icon')
 			->href($this->absolutePath($favicon))
@@ -278,6 +286,26 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 		}
 
 		return $head;
+	}
+
+
+
+	/**
+	 * @return \Nette\Utils\Html
+	 */
+	public function getElementPrototype()
+	{
+		return $this->headEl;
+	}
+
+
+
+	/**
+	 * @return \Nette\Utils\Html
+	 */
+	public function getElement()
+	{
+		return clone $this->headEl;
 	}
 
 

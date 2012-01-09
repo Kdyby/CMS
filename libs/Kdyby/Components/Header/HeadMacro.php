@@ -30,6 +30,9 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 	/** @var string[] */
 	private $prolog = array();
 
+	/** @var string[] */
+	private $epilog = array();
+
 
 
 	/**
@@ -59,7 +62,10 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 	 */
 	public function finalize()
 	{
-		return array(implode("\n", $this->prolog));
+		$prolog = $this->prolog;
+		$epilog = $this->epilog;
+		$this->prolog = $this->epilog = array();
+		return array(implode("\n", $prolog), implode("\n", $epilog));
 	}
 
 
@@ -71,8 +77,7 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 	 */
 	public function nodeOpened(Latte\MacroNode $node)
 	{
-		return Latte\PhpWriter::using($node)
-			->write('<?php Kdyby\Components\Header\HeadMacro::headBegin($presenter); ?>');
+		return '<?php Kdyby\Components\Header\HeadMacro::documentBegin(); ?>';
 	}
 
 
@@ -85,19 +90,25 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 	public function nodeClosed(Latte\MacroNode $node)
 	{
 		$writer = Latte\PhpWriter::using($node);
-		$node->content = $this->wrapTags(Template::optimizePhp($node->content), $writer);
-
 		if ($args = LatteHelpers::readArguments($node->tokenizer, $writer)) {
 			$this->prolog[] = Code\Helpers::formatArgs('Kdyby\Components\Header\HeadMacro::headArgs($presenter, ?);', array($args));
 		}
 
-		return $writer->write('<?php Kdyby\Components\Header\HeadMacro::headEnd($presenter); ?>');
+		$this->epilog[] = '$_document = Kdyby\Components\Header\HeadMacro::documentEnd();';
+		$this->epilog[] = 'Kdyby\Components\Header\HeadMacro::headBegin($presenter);';
+		$this->epilog[] = '?> '. $this->wrapTags(Template::optimizePhp($node->content), $writer) . '<?php';
+		$this->epilog[] = 'Kdyby\Components\Header\HeadMacro::headEnd($presenter);';
+		$this->epilog[] = 'echo $_document;';
+
+		$node->content = NULL;
+		return "";
 	}
 
 
 
 	/**
 	 * @param string $content
+	 * @param \Nette\Latte\PhpWriter $writer
 	 *
 	 * @return string
 	 */
@@ -115,6 +126,24 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 			));
 		}
 		return $code;
+	}
+
+
+
+	/**
+	 */
+	public static function documentBegin()
+	{
+		ob_start();
+	}
+
+
+
+	/**
+	 */
+	public static function documentEnd()
+	{
+		return ob_get_clean();
 	}
 
 

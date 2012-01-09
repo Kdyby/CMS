@@ -22,7 +22,7 @@ use Nette\Utils\Html;
 /**
  * @author Filip Procházka <filip.prochazka@kdyby.org>
  */
-class HeaderControl extends Kdyby\Application\UI\Control
+class HeaderControl extends Nette\Object implements Nette\ComponentModel\IComponent
 {
 
 	/** @var string */
@@ -57,6 +57,12 @@ class HeaderControl extends Kdyby\Application\UI\Control
 		'content-type' => array('http-equiv' => 'Content-Type', 'content' => 'text/html; charset=utf-8'),
 		'robots' => array('name' => 'robots', 'content' => 'noindex')
 	);
+
+	/** @var \Nette\ComponentModel\IContainer */
+	private $parent;
+
+	/** @var string */
+	private $name;
 
 
 
@@ -156,9 +162,9 @@ class HeaderControl extends Kdyby\Application\UI\Control
 	public function getTitle()
 	{
 		$titleEl = clone $this->titleEl;
-		$title = $this->titleReverse ? array_reverse($this->title) : $this->title;
-		$titleEl->setText(implode(' ' . $this->titleSeparator . ' ', $title));
-		return $titleEl;
+		$title = $this->title ?: $this->defaultTitle;
+		$title = $this->titleReverse ? array_reverse($title) : $title;
+		return $titleEl->setText(implode(' ' . $this->titleSeparator . ' ', $title));
 	}
 
 
@@ -179,7 +185,8 @@ class HeaderControl extends Kdyby\Application\UI\Control
 
 
 	/**
-	 * @param \Nette\Utils\Html $favicon
+	 * @param \Nette\Utils\Html|string $favicon
+	 *
 	 * @return \Nette\Utils\Html
 	 */
 	public function setFavicon($favicon)
@@ -195,6 +202,7 @@ class HeaderControl extends Kdyby\Application\UI\Control
 
 	/**
 	 * @param \Nette\Utils\Html|string $tag
+	 *
 	 * @return \Nette\Utils\Html
 	 */
 	public function addTag($tag)
@@ -223,12 +231,27 @@ class HeaderControl extends Kdyby\Application\UI\Control
 		// title
 		$head->add($this->getTitle());
 
-		// other tags
+		// other html tags
 		foreach ($this->htmlTags as $tag) {
 			$head->add(clone $tag);
 		}
 
-		// styles
+		// assets
+		$this->createStyles($head);
+		$this->createScripts($head);
+
+		return $head;
+	}
+
+
+
+	/**
+	 * @param \Nette\Utils\Html $head
+	 *
+	 * @return \Nette\Utils\Html
+	 */
+	protected function createStyles(Html $head)
+	{
 		$fm = $this->formulaeManager;
 		foreach ($fm->getAssets(FormulaeManager::TYPE_STYLESHEET) as $style) {
 			$el = Html::el('link')->href($style['src'])->type('text/css');
@@ -237,7 +260,19 @@ class HeaderControl extends Kdyby\Application\UI\Control
 			$head->add($el);
 		}
 
-		// scripts
+		return $head;
+	}
+
+
+
+	/**
+	 * @param \Nette\Utils\Html $head
+	 *
+	 * @return \Nette\Utils\Html
+	 */
+	protected function createScripts(Html $head)
+	{
+		$fm = $this->formulaeManager;
 		foreach ($fm->getAssets(FormulaeManager::TYPE_JAVASCRIPT) as $script) {
 			$head->add(Html::el('script')->src($script['src'])->type('text/javascript'));
 		}
@@ -248,6 +283,7 @@ class HeaderControl extends Kdyby\Application\UI\Control
 
 
 	/**
+	 * Renders the whole header contained in <header> tag
 	 */
 	public function render()
 	{
@@ -257,10 +293,68 @@ class HeaderControl extends Kdyby\Application\UI\Control
 
 
 	/**
+	 * Renders the while header without the <header> tag
 	 */
 	public function renderContent()
 	{
 		echo $this->createHead(Html::el());
+	}
+
+
+
+	/**
+	 * Renders only stylesheet elements
+	 */
+	public function renderStyles()
+	{
+		echo $this->createScripts(Html::el());
+	}
+
+
+
+	/**
+	 * Renders only javascript elements
+	 */
+	public function renderScripts()
+	{
+		echo $this->createScripts(Html::el());
+	}
+
+
+	/******************* Nette\ComponentModel\IComponent *********************/
+
+
+	/**
+	 * @return string
+	 */
+	public function getName()
+	{
+		return $this->name;
+	}
+
+
+
+	/**
+	 * Returns the container if any.
+	 * @return \Nette\ComponentModel\IContainer|NULL
+	 */
+	public function getParent()
+	{
+		return $this->parent;
+	}
+
+
+
+	/**
+	 * Sets the parent of this component.
+	 *
+	 * @param \Nette\ComponentModel\IContainer $parent
+	 * @param string $name
+	 */
+	public function setParent(Nette\ComponentModel\IContainer $parent = NULL, $name = NULL)
+	{
+		$this->parent = $parent;
+		$this->name = $name;
 	}
 
 }

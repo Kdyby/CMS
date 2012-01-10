@@ -61,6 +61,9 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	/** @var \Nette\ComponentModel\IContainer */
 	private $parent;
 
+	/** @var array */
+	private $renderedAssets = array();
+
 	/** @var string */
 	private $name;
 
@@ -229,7 +232,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 *
 	 * @return \Nette\Utils\Html
 	 */
-	protected function createHead(Html $head)
+	protected function buildHead(Html $head)
 	{
 		// meta
 		foreach ($this->meta as $meta) {
@@ -245,8 +248,8 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 		}
 
 		// assets
-		$this->createStyles($head);
-		$this->createScripts($head);
+		$this->buildStyles($head);
+		$this->buildScripts($head);
 
 		return $head;
 	}
@@ -258,8 +261,12 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 *
 	 * @return \Nette\Utils\Html
 	 */
-	protected function createStyles(Html $head)
+	protected function buildStyles(Html $head)
 	{
+		if (!empty($this->renderedAssets[FormulaeManager::TYPE_STYLESHEET])) {
+			return $head;
+		}
+
 		$fm = $this->formulaeManager;
 		foreach ($fm->getAssets(FormulaeManager::TYPE_STYLESHEET) as $style) {
 			$el = Html::el('link')->href($style['src'])->type('text/css');
@@ -268,6 +275,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 			$head->add($el);
 		}
 
+		$this->renderedAssets[FormulaeManager::TYPE_STYLESHEET] = TRUE;
 		return $head;
 	}
 
@@ -278,13 +286,18 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 *
 	 * @return \Nette\Utils\Html
 	 */
-	protected function createScripts(Html $head)
+	protected function buildScripts(Html $head)
 	{
+		if (!empty($this->renderedAssets[FormulaeManager::TYPE_JAVASCRIPT])) {
+			return $head;
+		}
+
 		$fm = $this->formulaeManager;
 		foreach ($fm->getAssets(FormulaeManager::TYPE_JAVASCRIPT) as $script) {
 			$head->add(Html::el('script')->src($script['src'])->type('text/javascript'));
 		}
 
+		$this->renderedAssets[FormulaeManager::TYPE_JAVASCRIPT] = TRUE;
 		return $head;
 	}
 
@@ -315,7 +328,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 */
 	public function render()
 	{
-		echo $this->createHead(clone $this->headEl);
+		echo $this->buildHead(clone $this->headEl);
 	}
 
 
@@ -325,7 +338,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 */
 	public function renderContent()
 	{
-		echo $this->createHead(Html::el());
+		echo $this->buildHead(Html::el());
 	}
 
 
@@ -335,7 +348,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 */
 	public function renderStyles()
 	{
-		echo $this->createScripts(Html::el());
+		echo $this->buildScripts(Html::el());
 	}
 
 
@@ -345,7 +358,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 */
 	public function renderScripts()
 	{
-		echo $this->createScripts(Html::el());
+		echo $this->buildScripts(Html::el());
 	}
 
 

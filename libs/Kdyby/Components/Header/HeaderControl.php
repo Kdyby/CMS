@@ -58,7 +58,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 		// 'robots' => array('name' => 'robots', 'content' => 'noindex')
 	);
 
-	/** @var \Nette\ComponentModel\IContainer */
+	/** @var \Kdyby\Application\UI\Presenter */
 	private $parent;
 
 	/** @var array */
@@ -297,6 +297,14 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 			$head->add(Html::el('script')->src($script['src'])->type('text/javascript'));
 		}
 
+		// inline assets captured from template should be executed at the end
+		$globals = $this->parent->getTemplate()->_g;
+		if (isset($globals->kdyby->assets['js'])) {
+			foreach ($globals->kdyby->assets['js'] as $inlineJs) {
+				$head->add(Html::el()->setHtml($inlineJs));
+			}
+		}
+
 		$this->renderedAssets[FormulaeManager::TYPE_JAVASCRIPT] = TRUE;
 		return $head;
 	}
@@ -348,7 +356,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 */
 	public function renderStyles()
 	{
-		echo $this->buildScripts(Html::el());
+		echo $this->buildStyles(Html::el());
 	}
 
 

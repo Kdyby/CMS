@@ -65,7 +65,10 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 		$prolog = $this->prolog;
 		$epilog = $this->epilog;
 		$this->prolog = $this->epilog = array();
-		return array(implode("\n", $prolog), implode("\n", $epilog));
+		return array(
+			implode("\n", $prolog) . "\n" . '$_g->kdyby->captureAssets = TRUE;', // inline assets will not be printed out
+			implode("\n", $epilog)
+		);
 	}
 
 
@@ -94,11 +97,11 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 			$this->prolog[] = Code\Helpers::formatArgs('Kdyby\Components\Header\HeadMacro::headArgs($presenter, ?);', array($args));
 		}
 
-		$this->epilog[] = '$_document = Kdyby\Components\Header\HeadMacro::documentEnd();';
+		$this->epilog[] = '$_documentBody = Kdyby\Components\Header\HeadMacro::documentEnd();';
 		$this->epilog[] = 'Kdyby\Components\Header\HeadMacro::headBegin($presenter);';
 		$this->epilog[] = '?> '. $this->wrapTags(Template::optimizePhp($node->content), $writer) . '<?php';
 		$this->epilog[] = 'Kdyby\Components\Header\HeadMacro::headEnd($presenter);';
-		$this->epilog[] = 'echo $_document;';
+		$this->epilog[] = 'echo $_documentBody;';
 
 		$node->content = NULL;
 		return "";
@@ -114,18 +117,10 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 	 */
 	private function wrapTags($content, Latte\PhpWriter $writer)
 	{
-		$code = NULL;
-		foreach (LatteHelpers::splitPhp($content) as $item) {
-			if (substr($item, 0, 5) === '<?php') {
-				$code .= $item;
-				continue;
-			}
-			$code .= Nette\Utils\Strings::replace($item, array(
-				'~<([^<\s]+)\s+~' => $writer->write('<?php ob_start(); ?>') . '<\\1 ',
-				'~\s+/>~' => " />" . $writer->write('<?php Kdyby\Components\Header\HeadMacro::tagCaptureEnd($presenter); ?>'),
-			));
-		}
-		return $code;
+		return LatteHelpers::wrapTags($content,
+			$writer->write('<?php ob_start(); ?>'),
+			$writer->write('<?php Kdyby\Components\Header\HeadMacro::tagCaptureEnd($presenter); ?>')
+		);
 	}
 
 

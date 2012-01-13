@@ -36,11 +36,11 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 
 
 	/**
-	 * @param \Nette\Latte\Parser $parser
+	 * @param \Nette\Latte\Compiler $compiler
 	 */
-	public static function install(Latte\Parser $parser)
+	public static function install(Latte\Compiler $compiler)
 	{
-		$parser->addMacro('head', new static());
+		$compiler->addMacro('head', new static($compiler));
 	}
 
 

@@ -15,7 +15,6 @@ use Kdyby\Templates\LatteHelpers;
 use Nette;
 use Nette\Application\UI;
 use Nette\Latte;
-use Nette\Templating\Template;
 use Nette\Utils\Html;
 use Nette\Utils\PhpGenerator as Code;
 
@@ -37,10 +36,13 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 
 	/**
 	 * @param \Nette\Latte\Compiler $compiler
+	 *
+	 * @return \Kdyby\Components\Header\HeadMacro
 	 */
 	public static function install(Latte\Compiler $compiler)
 	{
-		$compiler->addMacro('head', new static($compiler));
+		$compiler->addMacro('head', $me = new static($compiler));
+		return $me;
 	}
 
 
@@ -99,7 +101,7 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 
 		$this->epilog[] = '$_documentBody = Kdyby\Components\Header\HeadMacro::documentEnd();';
 		$this->epilog[] = 'Kdyby\Components\Header\HeadMacro::headBegin($presenter);';
-		$this->epilog[] = '?> '. $this->wrapTags(Template::optimizePhp($node->content), $writer) . '<?php';
+		$this->epilog[] = '?> '. $this->wrapTags(Nette\Templating\Helpers::optimizePhp($node->content), $writer) . '<?php';
 		$this->epilog[] = 'Kdyby\Components\Header\HeadMacro::headEnd($presenter);';
 		$this->epilog[] = 'echo $_documentBody;';
 

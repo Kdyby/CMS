@@ -82,7 +82,7 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 	 */
 	public function nodeOpened(Latte\MacroNode $node)
 	{
-		return '<?php Kdyby\Components\Header\HeadMacro::documentBegin(); ?>';
+		$node->openingCode = '<?php Kdyby\Components\Header\HeadMacro::documentBegin(); ?>';
 	}
 
 
@@ -106,7 +106,6 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 		$this->epilog[] = 'echo $_documentBody;';
 
 		$node->content = NULL;
-		return "";
 	}
 
 

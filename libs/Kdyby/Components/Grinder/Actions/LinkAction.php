@@ -30,6 +30,8 @@ class LinkAction extends BaseAction
 	/** @var Components\Image */
 	private $image;
 
+	/** @var string */
+	private $caption;
 
 
 	public function __construct()
@@ -122,6 +124,22 @@ class LinkAction extends BaseAction
 		}
 
 		return $control;
+	}
+
+	/**
+	 * @param string $caption 
+	 */
+	public function setCaption($caption)
+	{
+		$this->caption = $caption;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getCaption()
+	{
+		return $this->caption;
 	}
 
 }

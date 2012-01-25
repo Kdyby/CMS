@@ -25,7 +25,7 @@ use Kdyby\Components\VisualPaginator\VisualPaginator;
  * @author Filip Procházka
  *
  * @todo storage na filtry a page
- * @todo saveState & loadState (filtry, page, ..)
+ * @todo saveState & loadState (filtry, ..)
  * @todo inline editation
  * @todo nested nodes manipulation (column + renderer)
  * @todo column s indexem záznamu
@@ -54,9 +54,6 @@ class Grid extends Nette\Application\UI\Control implements \IteratorAggregate
 	const PLACEMENT_TOP = 'top';
 	const PLACEMENT_BOTTOM = 'bottom';
 	const PLACEMENT_BOTH = 'both';
-
-	/** @persistent int */
-	public $page = 1;
 
 	/** @persistent string */
 	public $sortColumn;

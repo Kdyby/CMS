@@ -10,7 +10,6 @@
 
 namespace Kdyby;
 
-use Nette;
 
 
 
@@ -27,11 +26,36 @@ final class CMS
 
 
 	/**
-	 * @throws Nette\StaticClassException
+	 * @throws \Kdyby\StaticClassException
 	 */
 	final public function __construct()
 	{
-		throw new Nette\StaticClassException;
+		throw new StaticClassException;
+	}
+
+
+
+	/**
+	 * @return array
+	 */
+	public static function getDefaultPackages()
+	{
+		return array(
+			'Kdyby\Package\ComponentsPackage\ComponentsPackage',
+			'Kdyby\Package\CmsPackage\CmsPackage',
+		);
+	}
+
+
+
+	/**
+	 * @return \Kdyby\Packages\PackagesList
+	 */
+	public static function createPackagesList()
+	{
+		return new Packages\PackagesList(
+			array_merge(Framework::getDefaultPackages(), static::getDefaultPackages())
+		);
 	}
 
 }

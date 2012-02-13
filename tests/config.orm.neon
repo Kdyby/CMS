@@ -1,0 +1,25 @@
+parameters:
+    doctrine:
+        connections: []
+        entityManagers: []
+        defaultConnection: default
+        defaultEntityManager: default
+
+
+dbal:
+    driver: pdo_sqlite
+    memory: TRUE
+
+
+services:
+    doctrine.registry:
+        class: Kdyby\Tests\ORM\SandboxRegistry
+        arguments:
+            - @container
+            - "%doctrine.connections%"
+            - "%doctrine.entityManagers%"
+            - "%doctrine.defaultConnection%"
+            - "%doctrine.defaultEntityManager%"
+
+    cacheStorage:
+        class: Nette\Caching\Storages\MemoryStorage

@@ -30,11 +30,8 @@ class ComponentsExtension extends Kdyby\Config\CompilerExtension
 		$container->addDefinition('cms_headerControl')
 			->setClass('Kdyby\Components\Header\HeaderControl', array('@application', '@assetic.formulaeManager'));
 
-		$container->addDefinition('cms_rbacForm')
-			->setClass('Kdyby\Components\AccessControl\RbacForm', array('@doctrine'))
-			->addTag('component');
-
 		$this->addMacro('macro_head', 'Kdyby\Components\Header\HeadMacro::install');
+		$this->addMacro('macros_grid', 'Kdyby\Components\Grinder\Latte\GrinderMacroSet::install');
 	}
 
 }

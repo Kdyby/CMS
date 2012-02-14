@@ -1,0 +1,40 @@
+{snippet}
+{block #grinder}
+
+{form form}
+{block #grinderTableBefore}
+    {* todo: toolbar-top *}
+    {block #grinderPaginatorTop}{/block}
+{/block}
+
+{if count($control)}
+    <table n:grid n:block="#grinderTable" class="grinder table table-bordered table-striped">
+        <thead n:inner-block="#grinderHeader">
+            <td n:gridHeader />
+        </thead>
+        <tbody n:inner-block="#grinderRows">
+            <tr n:gridRow n:class="$iterator->odd ? odd, $iterator->even ? even">
+                <td n:gridCell />
+            </tr>
+        </tbody>
+    </table>
+
+{else}
+    <table n:grid n:block="#grinderEmptyResult" class="grinder table table-bordered table-striped">
+        <thead>
+            {include #grinderHeader}
+        </thead>
+        <tbody>
+            <tr><td colspan="{=count($grid->columns)}">{$grid->emptyResultMessage}</td></tr>
+        </tbody>
+    </table>
+{/if}
+
+{block #grinderTableAfter}
+    {* todo: toolbar-bottom *}
+    {block #grinderPaginatorBottom}{include 'paginator.latte'}{/block}
+{/block}
+{/form}
+
+{/block}
+{/snippet}

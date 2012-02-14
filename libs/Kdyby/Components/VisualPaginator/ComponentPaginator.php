@@ -21,13 +21,13 @@ use Kdyby\Application\UI\Control;
 class ComponentPaginator extends Control
 {
 
-	/** @var Paginator */
+	/** @var \Kdyby\Components\VisualPaginator\Paginator */
 	private $paginator;
 
 
 
 	/**
-	 * @return Paginator
+	 * @return \Kdyby\Components\VisualPaginator\Paginator
 	 */
 	public function getPaginator()
 	{
@@ -69,8 +69,9 @@ class ComponentPaginator extends Control
 
 
 	/**
-	 * @param array
-	 * @return SubPaginator
+	 * @param string $page
+	 *
+	 * @return \Kdyby\Components\VisualPaginator\ComponentPaginator
 	 */
 	public function setPage($page)
 	{
@@ -81,8 +82,9 @@ class ComponentPaginator extends Control
 
 
 	/**
-	 * @param string
-	 * @return SubPaginator
+	 * @param string $file
+	 *
+	 * @return \Kdyby\Components\VisualPaginator\ComponentPaginator
 	 */
 	public function setTemplateFile($file)
 	{

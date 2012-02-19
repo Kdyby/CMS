@@ -168,9 +168,14 @@ class Column extends Nette\Object
 			return Html::el();
 		}
 
+		$class = array('ajax', 'sortable');
+		if ($type = $this->getSortType()) {
+			$class[] = 'sort-' . $type;
+		}
+
 		return Html::el('a', array(
 			'href' => $this->grid->lazyLink('sort!', array('sort' => $this->getSorting())),
-			'class' => 'ajax'
+			'class' => implode(' ', $class)
 		));
 	}
 

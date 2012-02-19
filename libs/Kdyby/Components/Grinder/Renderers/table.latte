@@ -10,7 +10,7 @@
 {if count($control)}
     <table n:grid n:block="#grinderTable" class="grinder table table-bordered table-striped">
         <thead n:inner-block="#grinderHeader">
-            <td n:gridHeader />
+            <th n:gridHeader />
         </thead>
         <tbody n:inner-block="#grinderRows">
             <tr n:gridRow n:class="$iterator->odd ? odd, $iterator->even ? even">

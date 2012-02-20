@@ -133,7 +133,7 @@ class GridFilters extends Nette\Object implements \ArrayAccess
 			}
 
 		} else {
-			$uniqParam = ':' . Strings::replace($column, array('~[^a-z0-9]+~' => NULL)). '_' . Strings::random(3);
+			$uniqParam = Strings::replace($column, array('~[^a-z0-9]+~' => NULL)). '_' . Strings::random(3);
 
 			if (is_array($value)) {
 				$operator = strtr($operator, array(
@@ -142,7 +142,7 @@ class GridFilters extends Nette\Object implements \ArrayAccess
 				));
 			}
 
-			$qb->andWhere($queryColumn . ' ' . $operator . ' ' . $uniqParam);
+			$qb->andWhere($queryColumn . ' ' . $operator . ' :' . $uniqParam);
 			$qb->setParameter($uniqParam, $value);
 		}
 	}

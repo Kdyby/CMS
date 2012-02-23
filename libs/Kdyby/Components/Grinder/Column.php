@@ -149,11 +149,23 @@ class Column extends Nette\Object
 	 */
 	public function getSortType()
 	{
-		if (!$this->isSorting()) {
+		if (!$this->isSorting() || !$this->isSortable()) {
 			return NULL;
 		}
 
 		return $this->grid->sort[$this->name];
+	}
+
+
+
+	/**
+	 * @return bool
+	 */
+	public function isSortable()
+	{
+		return $this->sortable
+			&& !$this->grid->disableOrder
+			&& $this->grid->isColumnNameValid($this->name, TRUE);
 	}
 
 
@@ -164,7 +176,7 @@ class Column extends Nette\Object
 	 */
 	public function getSortingControl()
 	{
-		if (!$this->sortable || $this->grid->disableOrder) {
+		if (!$this->isSortable()) {
 			return Html::el();
 		}
 
@@ -221,6 +233,10 @@ class Column extends Nette\Object
 	 */
 	public function getQueryExpr(QueryBuilder $query)
 	{
+		if (!$this->isSortable()) {
+			return NULL;
+		}
+
 		// find alias pairs
 		$aliases = $query->getEntityAliases();
 		$alias = reset($aliases);

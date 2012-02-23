@@ -324,7 +324,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 		}
 
 		if (!is_subclass_of($class, $base = 'Kdyby\Components\Grinder\Column') && $class !== $base) {
-			throw new Kdyby\InvalidArgumentException('Given type "' . $class . '" is not subclass of "Kdyby\Components\Grinder\Column".');
+			throw new Kdyby\InvalidStateException('Given type "' . $class . '" is not subclass of "Kdyby\Components\Grinder\Column".');
 		}
 
 		if (!$this->isColumnNameValid($name)) {
@@ -339,10 +339,11 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	/**
 	 * @internal
 	 * @param string $name
+	 * @param bool $isField
 	 *
 	 * @return bool
 	 */
-	public function isColumnNameValid($name)
+	public function isColumnNameValid($name, $isField = FALSE)
 	{
 		$class = $this->getClass();
 		$em = $this->getEntityManager();
@@ -358,7 +359,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 			}
 		}
 
-		return TRUE;
+		return $isField ? FALSE : TRUE;
 	}
 
 
@@ -470,15 +471,21 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 
 	/**
-	 * @param string $column
+	 * @param string $columnName
 	 * @param string $type
 	 *
 	 * @return bool
 	 */
-	private function isValidSorting($column, $type)
+	private function isValidSorting($columnName, $type)
 	{
-		return in_array($type, array('asc', 'desc', 'none'))
-			&& $this->getColumn($column);
+		try {
+			return in_array($type, array('asc', 'desc', 'none'))
+				&& ($column = $this->getColumn($columnName))
+				&& $column->isSortable();
+
+		} catch (Kdyby\InvalidStateException $e) {
+			return FALSE;
+		}
 	}
 
 

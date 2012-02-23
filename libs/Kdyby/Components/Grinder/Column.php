@@ -233,10 +233,6 @@ class Column extends Nette\Object
 	 */
 	public function getQueryExpr(QueryBuilder $query)
 	{
-		if (!$this->isSortable()) {
-			return NULL;
-		}
-
 		// find alias pairs
 		$aliases = $query->getEntityAliases();
 		$alias = reset($aliases);
@@ -252,7 +248,7 @@ class Column extends Nette\Object
 			}
 		}
 
-		return NULL;
+		return $alias;
 	}
 
 }

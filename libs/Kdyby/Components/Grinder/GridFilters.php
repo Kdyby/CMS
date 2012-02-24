@@ -148,13 +148,17 @@ class GridFilters extends Nette\Object implements \ArrayAccess
 			$uniqParam = Strings::replace($column, array('~[^a-z0-9]+~' => NULL)). '_' . Strings::random(3);
 
 			if (is_array($value)) {
-				$operator = strtr($operator, array(
-					'!=' => 'IS NOT IN',
-					'=' => 'IS IN',
-				));
+				$map = array(
+					'!=' => 'NOT IN',
+					'=' => 'IN',
+				);
+
+				$qb->andWhere($queryColumn . ' ' . strtr($operator, $map) . ' (:' . $uniqParam . ')');
+
+			} else {
+				$qb->andWhere($queryColumn . ' ' . $operator . ' :' . $uniqParam);
 			}
 
-			$qb->andWhere($queryColumn . ' ' . $operator . ' :' . $uniqParam);
 			$qb->setParameter($uniqParam, $value);
 		}
 	}

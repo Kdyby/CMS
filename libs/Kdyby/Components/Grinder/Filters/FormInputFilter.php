@@ -21,7 +21,7 @@ use Nette;
 class FormInputFilter extends Kdyby\Components\Grinder\QueryFilter
 {
 
-	/** @var \Nette\Forms\IControl */
+	/** @var \Nette\Forms\Controls\BaseControl */
 	public $control;
 
 
@@ -37,7 +37,7 @@ class FormInputFilter extends Kdyby\Components\Grinder\QueryFilter
 
 
 	/**
-	 * @return mixed
+	 * @return string|array
 	 */
 	protected function getValue()
 	{

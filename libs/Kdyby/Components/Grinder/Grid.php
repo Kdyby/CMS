@@ -88,6 +88,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 		$this->addComponent(new GridForm, 'form');
 		$this->paginator = new Paginator;
+		$this->paginator->itemsPerPage = 20;
 		$this->filters = new GridFilters($this);
 
 		$this->queryBuilder = $queryBuilder;

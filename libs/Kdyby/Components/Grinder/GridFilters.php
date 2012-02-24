@@ -75,7 +75,7 @@ class GridFilters extends Nette\Object implements \ArrayAccess
 			/** @var \Kdyby\Components\Grinder\QueryFilter $value */
 			$value->column = $name;
 			$value->operator = $operation;
-			return $this->filters[$name] = $value;
+			return $this->filters[$name][] = $value;
 		}
 
 		// find appropriate handler
@@ -93,7 +93,18 @@ class GridFilters extends Nette\Object implements \ArrayAccess
 
 		$handler->column = $name;
 		$handler->operator = $operation;
-		return $this->filters[$name] = $handler;
+		return $this->filters[$name][] = $handler;
+	}
+
+
+
+	/**
+	 * @param string $column
+	 * @return \Kdyby\Components\Grinder\QueryFilter[]|NULL
+	 */
+	public function getFilters($column)
+	{
+		return isset($this->filters[$column]) ? $this->filters[$column] : NULL;
 	}
 
 
@@ -103,7 +114,8 @@ class GridFilters extends Nette\Object implements \ArrayAccess
 	 */
 	public function apply(QueryBuilder $queryBuilder)
 	{
-		foreach ($this->filters as $filter) {
+		foreach (Nette\Utils\Arrays::flatten($this->filters) as $filter) {
+			/** @var \Kdyby\Components\Grinder\QueryFilter $filter*/
 			$filter->apply($this, $queryBuilder);
 		}
 	}
@@ -163,18 +175,15 @@ class GridFilters extends Nette\Object implements \ArrayAccess
 
 	/**
 	 * @param string $offset
-	 * @return \Kdyby\Components\Grinder\QueryFilter|\Kdyby\Components\Grinder\GridFiltersFluent
+	 * @return \Kdyby\Components\Grinder\GridFiltersFluent
 	 */
 	public function offsetGet($offset)
 	{
 		if (!$this->offsetExists($offset)) {
 			throw new Kdyby\InvalidStateException("Column name '$offset' is not valid.");
-
-		} elseif (!isset($this->filters[$offset])) {
-			return new GridFiltersFluent($this, $offset);
 		}
 
-		return $this->filters[$offset];
+		return new GridFiltersFluent($this, $offset);
 	}
 
 

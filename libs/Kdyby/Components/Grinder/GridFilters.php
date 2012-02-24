@@ -233,7 +233,7 @@ class GridFiltersFluent extends Nette\Object
 		'greaterthan' => '>',
 		'greaterorequals' => '>=',
 		'lesserthan' => '<',
-		'lesserorquals' => '<=',
+		'lesserorequals' => '<=',
 	);
 
 	/** @var \Kdyby\Components\Grinder\GridFilters */

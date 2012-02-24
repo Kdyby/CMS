@@ -257,6 +257,8 @@ class GridFiltersFluent extends Nette\Object
 
 
 	/**
+	 * @todo: ->between($a, $b)
+	 *
 	 * @param string $operation
 	 * @param array $args
 	 *

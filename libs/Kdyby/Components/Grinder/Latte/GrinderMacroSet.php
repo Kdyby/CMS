@@ -98,7 +98,7 @@ class GrinderMacroSet extends Nette\Latte\Macros\MacroSet
 			$this->iterateColumns($node, '$caption = $column->caption;');
 
 		} else { // expands <td n:gridHeader="name" />
-			$node->openingCode = '<?php '. $writer->write('$_column = $column = $_grid->getColumn(%node.word);') . '?>';
+			$node->openingCode = '<?php '. $writer->write('$_column = $column = $_grid->getColumn(%node.word);') . '$caption = $column->caption; ?>';
 			$this->wrapHeaderContent($node);
 		}
 	}

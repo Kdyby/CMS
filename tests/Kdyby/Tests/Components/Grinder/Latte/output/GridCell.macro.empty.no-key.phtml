@@ -1,0 +1,4 @@
+<?php foreach ($iterator = $_l->its[] = new Nette\Iterators\CachingIterator($_gridColumns) as $column): $value = $column->getValue() ?>
+<th><?php echo Nette\Templating\Helpers::escapeHtml($value, ENT_NOQUOTES) ?></th>
+<?php endforeach; array_pop($_l->its); $iterator = end($_l->its) ?>
+.

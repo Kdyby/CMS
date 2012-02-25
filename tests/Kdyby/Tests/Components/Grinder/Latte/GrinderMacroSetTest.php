@@ -28,42 +28,26 @@ class GrinderMacroSetTest extends Kdyby\Tests\LatteTestCase
 
 
 
-	public function testMacroGrid_withoutName()
+	/**
+	 * @return array
+	 */
+	public function dataMacros()
 	{
-		$this->parse(__DIR__ . '/files/Grid.macro.withoutName.latte');
-		$this->assertLatteMacroEquals(__DIR__ . '/output/Grid.macro.withoutName.phtml');
+		return $this->findInputOutput('files/*.latte', 'output/*.phtml');
 	}
 
 
 
-	public function testMacroGrid_withName()
+	/**
+	 * @dataProvider dataMacros
+	 *
+	 * @param string $input
+	 * @param string $output
+	 */
+	public function testMacro($input, $output)
 	{
-		$this->parse(__DIR__ . '/files/Grid.macro.withName.latte');
-		$this->assertLatteMacroEquals(__DIR__ . '/output/Grid.macro.withName.phtml');
-	}
-
-
-
-	public function testMacroGridHeader_empty_key()
-	{
-		$this->parse(__DIR__ . '/files/GridHeader.macro.empty.key.latte');
-		$this->assertLatteMacroEquals(__DIR__ . '/output/GridHeader.macro.empty.key.phtml');
-	}
-
-
-
-	public function testMacroGridHeader_empty_noKey()
-	{
-		$this->parse(__DIR__ . '/files/GridHeader.macro.empty.no-key.latte');
-		$this->assertLatteMacroEquals(__DIR__ . '/output/GridHeader.macro.empty.no-key.phtml');
-	}
-
-
-
-	public function testMacroGridHeader_filled_key()
-	{
-		$this->parse(__DIR__ . '/files/GridHeader.macro.filled.key.latte');
-		$this->assertLatteMacroEquals(__DIR__ . '/output/GridHeader.macro.filled.key.phtml');
+		$this->parse($input);
+		$this->assertLatteMacroEquals($output);
 	}
 
 }

@@ -67,7 +67,7 @@ class GrinderMacroSet extends Nette\Latte\Macros\MacroSet
 	public function macroHeaderBegin(MacroNode $node, PhpWriter $writer)
 	{
 		// handles "{gridHeader name /}"
-		if ($node->isEmpty = (substr($node->args, -1) === '/')) {
+		if ($node->isEmpty = (substr($node->args, -1) === '/') && !$node->htmlNode) {
 			$node->content = '<?php ' . $writer->write('$_column = $column = $_grid->getColumn(%node.word);') . ' ?><td />';
 
 			// expand <td />, and make it work
@@ -107,6 +107,20 @@ class GrinderMacroSet extends Nette\Latte\Macros\MacroSet
 
 	/**
 	 * @param \Nette\Latte\MacroNode $node
+	 *
+	 * @return bool
+	 */
+	private function wrapHeaderContent(MacroNode $node)
+	{
+		$start = '<?php echo $_column->getSortingControl()->startTag(); ?>';
+		$end = '<?php echo $_column->getSortingControl()->endTag(); ?>';
+		return $this->createTagContainer($node, $start, $end);
+	}
+
+
+
+	/**
+	 * @param \Nette\Latte\MacroNode $node
 	 * @param \Nette\Latte\PhpWriter $writer
 	 */
 	public function macroRowBegin(MacroNode $node, PhpWriter $writer)
@@ -117,9 +131,8 @@ class GrinderMacroSet extends Nette\Latte\Macros\MacroSet
 
 	/**
 	 * @param \Nette\Latte\MacroNode $node
-	 * @param \Nette\Latte\PhpWriter $writer
 	 */
-	public function macroRowEnd(MacroNode $node, PhpWriter $writer)
+	public function macroRowEnd(MacroNode $node)
 	{
 		$node->openingCode = '<?php foreach ($iterator = $_l->its[] = new Nette\Iterators\CachingIterator($_grid) as $item): ?>';
 		$node->closingCode = '<?php endforeach; array_pop($_l->its); $iterator = end($_l->its) ?>';
@@ -135,11 +148,14 @@ class GrinderMacroSet extends Nette\Latte\Macros\MacroSet
 	{
 		// handles "{gridCell name /}"
 		if ($node->isEmpty = (substr($node->args, -1) === '/')) {
-			$node->content = '<td />';
+			$node->setArgs(trim(substr($node->args, 0, -1)));
 
-			// expand <td />, and make it work
-			if ($this->expandCell($node, $writer, '$_grid->getColumn(%node.word)->getValue()')) {
-				$node->openingCode = $node->content;
+			if (!$node->htmlNode) {
+				if (!$node->args) {
+					throw new Nette\Latte\CompileException("This usage is not supported.");
+				}
+
+				$node->openingCode = '<?php echo ' . $writer->write('$_grid->getColumn(%node.word)->getCellControl()->addAttributes(%node.array)') . '?>';
 				$node->content = NULL;
 			}
 		}
@@ -153,6 +169,15 @@ class GrinderMacroSet extends Nette\Latte\Macros\MacroSet
 	 */
 	public function macroCellEnd(MacroNode $node, PhpWriter $writer)
 	{
+		$opening = '$_column = $column = $_grid->getColumn(%node.word); $value = $_column->getValue();';
+		if (!$node->htmlNode && $node->args) { // expands {gridCell name}{$value}{/gridCell}
+			$node->openingCode = '<?php ' .
+				$writer->write($opening) .
+				' echo $_column->getCellControl()->startTag(); ?>';
+			$node->closingCode = '<?php echo $_column->getCellControl()->endTag(); ?>';
+			return;
+		}
+
 		// expands <td />
 		$this->expandCell($node, $writer, '$value');
 
@@ -160,24 +185,10 @@ class GrinderMacroSet extends Nette\Latte\Macros\MacroSet
 			$this->iterateColumns($node, '$value = $column->getValue();');
 
 		} else { // expands <td n:gridCell="name" />
-			$node->openingCode = '<?php ' .
-				$writer->write('$_column = $column = $_grid->getColumn(%node.word); $value = $column->getValue();') .
-				'?>';
+			$node->openingCode = '<?php ' . $writer->write($opening) . '?>';
 		}
-	}
 
-
-
-	/**
-	 * @param \Nette\Latte\MacroNode $node
-	 *
-	 * @return bool
-	 */
-	private function wrapHeaderContent(MacroNode $node)
-	{
-		$start = '<?php echo $_column->getSortingControl()->startTag(); ?>';
-		$end = '<?php echo $_column->getSortingControl()->endTag(); ?>';
-		return $this->createTagContainer($node, $start, $end);
+		$node->attrCode = '<?php echo $_column->getCellControl()->attributes()?>';
 	}
 
 
@@ -196,7 +207,7 @@ class GrinderMacroSet extends Nette\Latte\Macros\MacroSet
 		}
 
 		$tagName = $node->htmlNode->name;
-		if ($m = Strings::match($node->content, '~(<' . $tagName . '(?:\s+(?:.*))?>)(.*)(<\\/' . $tagName . '>)~mi')) {
+		if ($m = Strings::match($node->content, '~(<' . $tagName . '(?:\s+(?:.*?))?>)(.*)(<\\/' . $tagName . '>)~mi')) {
 			$content = substr_replace($m[0], $containerStart . $m[2] . $containerEnd, strlen($m[1]), strlen($m[2]));
 			$node->content = strtr($node->content, array(
 				$m[0] => $content

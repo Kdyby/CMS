@@ -1,0 +1,15 @@
+<?php echo $_grid->getColumn("author.name")->getCellControl()->addAttributes(array('class' => "cell"))?>
+
+
+<?php $_column = $column = $_grid->getColumn("author.name"); $value = $_column->getValue(); echo $_column->getCellControl()->startTag(); echo Nette\Templating\Helpers::escapeHtml($value, ENT_NOQUOTES) ;echo $_column->getCellControl()->endTag() ?>
+
+
+<?php foreach ($iterator = $_l->its[] = new Nette\Iterators\CachingIterator($_gridColumns) as $column): $value = $column->getValue() ?>
+<th class="cell" <?php echo $_column->getCellControl()->attributes()?>><?php echo Nette\Templating\Helpers::escapeHtml($value, ENT_NOQUOTES) ?></th>
+<?php endforeach; array_pop($_l->its); $iterator = end($_l->its) ?>
+
+<?php $_column = $column = $_grid->getColumn("author.name"); $value = $_column->getValue()?>
+<th class="cell" <?php echo $_column->getCellControl()->attributes()?>><?php echo Nette\Templating\Helpers::escapeHtml($value, ENT_NOQUOTES) ?></th>
+
+<?php $_column = $column = $_grid->getColumn("author.name"); $value = $_column->getValue()?>
+<th class="cell"<?php echo $_column->getCellControl()->attributes()?>><?php echo Nette\Templating\Helpers::escapeHtml($value, ENT_NOQUOTES) ?></th>

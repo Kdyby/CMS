@@ -55,6 +55,9 @@ class Column extends Nette\Object
 	/** @var mixed */
 	private $value;
 
+	/** @var mixed */
+	protected $fullLengthValue;
+
 	/** @var \Nette\Callback[] */
 	private $filters = array();
 
@@ -107,6 +110,7 @@ class Column extends Nette\Object
 		}
 
 		if (is_string($value) && $this->maxLength !== 0) {
+			$this->fullLengthValue = $value;
 			$value = Strings::truncate($value, $this->maxLength);
 		}
 
@@ -166,6 +170,22 @@ class Column extends Nette\Object
 		return $this->sortable
 			&& !$this->grid->disableOrder
 			&& $this->grid->isColumnNameValid($this->name, TRUE);
+	}
+
+
+
+	/**
+	 * @internal
+	 * @return \Nette\Utils\Html
+	 */
+	public function getCellControl()
+	{
+		$attrs = array();
+		$value = $this->getValue();
+		if ($this->fullLengthValue) {
+			$attrs['title'] = $this->fullLengthValue;
+		}
+		return Html::el('td', $attrs)->setText($value);
 	}
 
 

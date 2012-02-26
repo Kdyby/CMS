@@ -1,0 +1,9 @@
+{gridCell author.name, class => "cell" /}
+
+{gridCell author.name}{$value}{/gridCell}
+
+<th n:gridCell class="cell" />
+
+<th n:gridCell="author.name" class="cell" />
+
+<th n:gridCell="author.name" class="cell">{$value}</th>

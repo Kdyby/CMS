@@ -466,7 +466,9 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	 */
 	public function setSorting($column, $type = 'a')
 	{
-		$this->sort = array($column => $type);
+		if (!$this->sort){
+			$this->sort = array($column => $type);
+		}
 	}
 
 

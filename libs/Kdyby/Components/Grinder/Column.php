@@ -37,6 +37,9 @@ class Column extends Nette\Object
 	/** @var int */
 	public $maxLength = 0;
 
+	/** @var int */
+	public $maxTitleLength = 1000;
+
 	/** @var bool */
 	public $sortable = TRUE;
 
@@ -168,7 +171,7 @@ class Column extends Nette\Object
 	public function isSortable()
 	{
 		return $this->sortable
-			&& !$this->grid->disableOrder
+			&& !$this->grid->disableSorting
 			&& $this->grid->isColumnNameValid($this->name, TRUE);
 	}
 
@@ -181,9 +184,12 @@ class Column extends Nette\Object
 	public function getCellControl()
 	{
 		$attrs = array();
+		if ($this->editable) {
+			$attrs['data-grinder-column'] = $this->name;
+		}
 		$value = $this->getValue();
 		if ($this->fullLengthValue) {
-			$attrs['title'] = $this->fullLengthValue;
+			$attrs['title'] = Strings::truncate($this->fullLengthValue, $this->maxTitleLength);
 		}
 		return Html::el('td', $attrs)->setText($value);
 	}
@@ -221,7 +227,7 @@ class Column extends Nette\Object
 		$type = $this->getNextSortingType();
 
 		$sort = $this->grid->sort;
-		if ($this->grid->multiOrder) {
+		if ($this->grid->multiSort) {
 			$sort[$this->name] = $type;
 
 		} else {
@@ -246,6 +252,8 @@ class Column extends Nette\Object
 
 
 	/**
+	 * Translates column name "e.author.address.street" to dql-understandable format "addr.street"
+	 *
 	 * @internal
 	 * @param \Kdyby\Doctrine\QueryBuilder $query
 	 *

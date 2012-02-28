@@ -18,8 +18,19 @@ use Kdyby;
 /**
  * @author Filip Procházka
  */
-class GridForm extends \Kdyby\Application\UI\Form
+class GridForm extends Kdyby\Doctrine\Forms\Form
 {
+
+	/**
+	 * @param \Kdyby\Doctrine\Registry $doctrine
+	 */
+	public function __construct(Kdyby\Doctrine\Registry $doctrine)
+	{
+		parent::__construct($doctrine);
+		$this->monitor('Kdyby\Components\Grinder\Grid');
+	}
+
+
 
 	/**
 	 */
@@ -44,7 +55,7 @@ class GridForm extends \Kdyby\Application\UI\Form
 
 
 	/**
-	 * Don't call repetedly
+	 * Don't call repeatedly
 	 *
 	 * @param array $ids
 	 */

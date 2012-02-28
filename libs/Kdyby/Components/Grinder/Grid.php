@@ -39,13 +39,10 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	public $sort = array();
 
 	/** @var bool */
-	public $multiOrder = FALSE;
+	public $multiSort = FALSE;
 
 	/** @var bool  */
-	public $disableOrder = FALSE;
-
-	/** @var bool */
-	public $editable = FALSE;
+	public $disableSorting = FALSE;
 
 	/** @var bool */
 	public $rememberState = FALSE;
@@ -68,7 +65,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	/** @var object */
 	private $record;
 
-	/** @var \Nette\Http\SessionSection */
+	/** @var \Nette\Http\SessionSection|\stdClass */
 	private $session;
 
 	/** @var \Kdyby\Components\Grinder\GridFilters|\Kdyby\Components\Grinder\GridFiltersFluent[] */
@@ -81,12 +78,13 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 	/**
 	 * @param \Kdyby\Doctrine\QueryBuilder $queryBuilder
+	 * @param \Kdyby\Doctrine\Registry $doctrine
 	 */
-	public function __construct(QueryBuilder $queryBuilder)
+	public function __construct(QueryBuilder $queryBuilder, Kdyby\Doctrine\Registry $doctrine)
 	{
 		parent::__construct();
 
-		$this->addComponent(new GridForm, 'form');
+		$this->addComponent(new GridForm($doctrine), 'form');
 		$this->paginator = new Paginator;
 		$this->paginator->itemsPerPage = 20;
 		$this->filters = new GridFilters($this);
@@ -155,10 +153,10 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 		$this->configureFilters($this->getPresenter());
 
 		// validate sorting
-		if ($this->disableOrder) {
+		if ($this->disableSorting) {
 			$this->sort = array();
 
-		} elseif (!$this->multiOrder && count($this->sort) > 1) {
+		} elseif (!$this->multiSort && count($this->sort) > 1) {
 			$this->sort = array();
 		}
 
@@ -364,6 +362,29 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	}
 
 
+
+	/**
+	 * @param string $name
+	 *
+	 * @return \Kdyby\Doctrine\Mapping\ClassMetadata
+	 */
+	private function getColumnMeta($name)
+	{
+		$class = $this->getClass();
+		$em = $this->getEntityManager();
+		foreach (explode('.', $name) as $field) {
+			if ($class->hasAssociation($field)) {
+				$class = $em->getClassMetadata($class->getAssociationTargetClass($field));
+
+			} elseif ($class->hasField($field)) {
+				return $class;
+			}
+		}
+
+		return $class;
+	}
+
+
 	/********************* Data *********************/
 
 
@@ -377,7 +398,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 		}
 
 		$qb = clone $this->queryBuilder;
-		$qb->getParameters($qb->getParameters());
+		$qb->setParameters($qb->getParameters());
 		return $this->iterator = new GridIterator($this, $qb);
 	}
 
@@ -582,7 +603,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	 */
 	protected function createTemplate($class = null)
 	{
-		/** @var \Nette\Templating\FileTemplate $template */
+		/** @var \Nette\Templating\FileTemplate|\stdClass $template */
 		$template = parent::createTemplate();
 		if ($template->getFile() === NULL){
 			$template->setFile(__DIR__ . "/Renderers/table.latte");

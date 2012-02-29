@@ -23,7 +23,7 @@ use Nette\Utils\Strings;
 class GridFilters extends Nette\Object implements \ArrayAccess
 {
 	/** @var array */
-	public static $handlers = array(
+	public $handlers = array(
 		'Kdyby\Components\Grinder\Filters\FormInputFilter',
 		'Kdyby\Components\Grinder\Filters\ParameterFilter',
 		'Kdyby\Components\Grinder\Filters\CallbackFilter',
@@ -79,7 +79,7 @@ class GridFilters extends Nette\Object implements \ArrayAccess
 		}
 
 		// find appropriate handler
-		foreach (static::$handlers as $handler) {
+		foreach ($this->handlers as $handler) {
 			/** @var \Kdyby\Components\Grinder\QueryFilter $handler */
 			if ($handler::canHandle($value)) {
 				$handler = new $handler($value);
@@ -130,10 +130,10 @@ class GridFilters extends Nette\Object implements \ArrayAccess
 	 */
 	public function filterQuery(QueryBuilder $qb, $column, $operator, $value)
 	{
-		$expr = $qb->expr();
 		$queryColumn = $this->grid->getColumn($column)->getQueryExpr($qb);
 
 		if ($value === NULL) {
+			$expr = $qb->expr();
 			if ($operator === '=') {
 				$qb->andWhere($expr->isNull($queryColumn));
 

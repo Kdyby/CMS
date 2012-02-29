@@ -19,9 +19,9 @@ use Nette;
 /**
  * @author Filip Procházka <filip.prochazka@kdyby.org>
  *
- * @method \Kdyby\Components\Grinder\QueryFilter setOperator($operator)
- * @method \Kdyby\Components\Grinder\QueryFilter setIgnoreNull($ignore)
- * @method \Kdyby\Components\Grinder\QueryFilter setColumn($column)
+ * @method \Kdyby\Components\Grinder\QueryFilter setOperator(string $operator)
+ * @method \Kdyby\Components\Grinder\QueryFilter setIgnoreNull(boolean $ignore)
+ * @method \Kdyby\Components\Grinder\QueryFilter setColumn(string $column)
  */
 abstract class QueryFilter extends Nette\Object
 {
@@ -48,14 +48,14 @@ abstract class QueryFilter extends Nette\Object
 	{
 		$this->filters = $filters;
 		if (($value = $this->getValue()) !== NULL || $this->ignoreNull === FALSE) {
-			$filters->filterQuery($qb, $this->column, $this->operator, $this->getValue());
+			$filters->filterQuery($qb, $this->column, $this->operator, $value);
 		}
 	}
 
 
 
 	/**
-	 * @retun mixed
+	 * @return string|array
 	 */
 	abstract protected function getValue();
 

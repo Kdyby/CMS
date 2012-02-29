@@ -218,7 +218,6 @@ class GridFilters extends Nette\Object implements \ArrayAccess
 
 
 /**
- * @internal
  * @method \Kdyby\Components\Grinder\QueryFilter equals($value)
  * @method \Kdyby\Components\Grinder\QueryFilter notEquals($value)
  * @method \Kdyby\Components\Grinder\QueryFilter greaterThan($value)

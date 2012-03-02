@@ -12,10 +12,13 @@ namespace Kdyby\Components\Grinder;
 
 use Kdyby;
 use Kdyby\Components\Grinder;
+use Kdyby\Doctrine\Forms\EntityContainer;
 use Kdyby\Doctrine\QueryBuilder;
+use Kdyby\Doctrine\Mapping\ClassMetadata;
 use Nette;
 use Nette\Utils\Html;
 use Nette\Utils\Strings;
+use Nette\Utils\Json;
 
 
 
@@ -27,6 +30,12 @@ use Nette\Utils\Strings;
  * @property-read string $name
  * @property-read \Kdyby\Components\Grinder\Grid $grid
  * @property-read mixed $value
+ * @method \Kdyby\Components\Grinder\Column setDateTimeFormat(string $format)
+ * @method \Kdyby\Components\Grinder\Column setMaxLength(int $length)
+ * @method \Kdyby\Components\Grinder\Column setMaxTitleLength(int $length)
+ * @method \Kdyby\Components\Grinder\Column setSortable(bool $sortable)
+ * @method \Kdyby\Components\Grinder\Column setEditable(bool $editable)
+ * @method \Kdyby\Components\Grinder\Column setCaption(bool $caption)
  */
 class Column extends Nette\Object
 {
@@ -141,6 +150,45 @@ class Column extends Nette\Object
 
 
 	/**
+	 * @param \Kdyby\Doctrine\Forms\EntityContainer|\Kdyby\Application\UI\Form $container
+	 * @param \Kdyby\Doctrine\Mapping\ClassMetadata $class
+	 *
+	 * @return
+	 */
+	public function createFormControl(EntityContainer $container, ClassMetadata $class)
+	{
+		if (!$this->editable) {
+			return;
+		}
+
+		$path = explode('.', $this->name);
+		if ($class->hasField($field = end($path))) { // $class is parent
+			switch ($class->getTypeOfField($field)) {
+				case 'datetime':
+				case 'datetimez':
+					$container->addDatetime($field);
+					break;
+
+				case 'date':
+					$container->addDate($field);
+					break;
+
+				case 'time':
+					$container->addTime($field);
+					break;
+
+				default:
+					$container->addText($field);
+			}
+
+		} else { // $class is current
+
+		}
+	}
+
+
+
+	/**
 	 * @return bool
 	 */
 	public function isSorting()
@@ -183,14 +231,22 @@ class Column extends Nette\Object
 	 */
 	public function getCellControl()
 	{
-		$attrs = array();
-		if ($this->editable) {
-			$attrs['data-grinder-column'] = $this->name;
+		$attrs = array(
+			'class' => 'grinder-cell',
+		);
+
+		if ($this->editable){
+			$attrs['data-grinder-cell'] = Json::encode(array(
+				'column' => $this->name,
+				'item' => $this->getGrid()->getCurrentRecordId()
+			));
 		}
+
 		$value = $this->getValue();
 		if ($this->fullLengthValue) {
 			$attrs['title'] = Strings::truncate($this->fullLengthValue, $this->maxTitleLength);
 		}
+
 		return Html::el('td', $attrs)->setText($value);
 	}
 
@@ -277,6 +333,19 @@ class Column extends Nette\Object
 		}
 
 		return $alias;
+	}
+
+
+
+	/**
+	 * @param string $name
+	 * @param array $args
+	 *
+	 * @return mixed
+	 */
+	public function __call($name, $args)
+	{
+		return Nette\ObjectMixin::callProperty($this, $name, $args);
 	}
 
 }

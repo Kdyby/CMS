@@ -1,5 +1,7 @@
-<?php $_grid = $grid = Kdyby\Components\Grinder\Latte\GrinderMacroSet::gridBegin($control["items"]);$_gridColumns = $_grid->getColumns() ?><table>
+<?php $_grid = $grid = Kdyby\Components\Grinder\Latte\GrinderMacroSet::gridBegin($control["items"]); $_gridColumns = $_grid->getColumns() ?>
+<table<?php echo $_grid->getTableControl()->attributes() ?>>
 </table>
 
-<?php $_grid = $grid = Kdyby\Components\Grinder\Latte\GrinderMacroSet::gridBegin($control);$_gridColumns = $_grid->getColumns() ?><table>
+<?php $_grid = $grid = Kdyby\Components\Grinder\Latte\GrinderMacroSet::gridBegin($control); $_gridColumns = $_grid->getColumns() ?>
+<table<?php echo $_grid->getTableControl()->attributes() ?>>
 </table>

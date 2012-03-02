@@ -32,7 +32,7 @@ class GrinderMacroSet extends Nette\Latte\Macros\MacroSet
 	public static function install(Latte\Compiler $compiler)
 	{
 		$me = new static($compiler);
-		$me->addMacro('grid', array($me, 'macroGridBegin'), '');
+		$me->addMacro('grid', NULL, NULL, array($me, 'macroGridAttr'));
 		$me->addMacro('gridHeader', array($me, 'macroHeaderBegin'), array($me, 'macroHeaderEnd'));
 		$me->addMacro('gridRow', array($me, 'macroRowBegin'), array($me, 'macroRowEnd'));
 		$me->addMacro('gridCell', array($me, 'macroCellBegin'), array($me, 'macroCellEnd'));
@@ -47,15 +47,21 @@ class GrinderMacroSet extends Nette\Latte\Macros\MacroSet
 	 *
 	 * @return string
 	 */
-	public function macroGridBegin(MacroNode $node, PhpWriter $writer)
+	public function macroGridAttr(MacroNode $node, PhpWriter $writer)
 	{
-		$columns = '$_gridColumns = $_grid->getColumns();';
-		if ($node->args !== '') {
-			return $writer->write('$_grid = $grid = ' . get_called_class() . '::gridBegin($control[%node.word]);' . $columns);
+		$node->openingCode = '<?php $_grid = $grid = ' . get_called_class() . '::gridBegin(' .
+			$writer->write($node->args !== '' ? '$control[%node.word]' : '$control') .
+			'); $_gridColumns = $_grid->getColumns(); ?>';
 
-		} else {
-			return $writer->write('$_grid = $grid = ' . get_called_class() . '::gridBegin($control);' . $columns);
+		$reset = NULL;
+		if ($node->htmlNode->attrs) {
+			$reset = $writer->write(
+				'->addAttributes(%var)',
+				array_fill_keys(array_keys($node->htmlNode->attrs), NULL)
+			);
 		}
+
+		return 'echo $_grid->getTableControl()' . $reset . '->attributes()';
 	}
 
 

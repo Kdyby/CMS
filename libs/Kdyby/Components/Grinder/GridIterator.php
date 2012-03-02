@@ -61,6 +61,10 @@ class GridIterator extends \IteratorIterator
 
 		// sorting
 		foreach ((array)$this->grid->sort as $column => $type) {
+			if ($type === 'none') {
+				continue;
+			}
+
 			if ($column = $this->grid->getColumn($column)->getQueryExpr($queryBuilder)) {
 				$queryBuilder->addOrderBy($column, $type === 'desc' ? 'DESC' : 'ASC');
 
@@ -136,7 +140,7 @@ class GridIterator extends \IteratorIterator
 	 */
 	public function getCurrentId()
 	{
-		$id = $this->getClass()->getIdentifierValues($this->current());
+		$id = $this->getClass()->getIdentifierValues($this->getGrid()->getCurrent());
 		return reset($id);
 	}
 

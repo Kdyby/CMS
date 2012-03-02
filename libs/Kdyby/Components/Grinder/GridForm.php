@@ -20,6 +20,10 @@ use Kdyby;
  */
 class GridForm extends Kdyby\Doctrine\Forms\Form
 {
+	/** @var \Kdyby\Components\Grinder\CollectionContainer */
+	private $rows;
+
+
 
 	/**
 	 * @param \Kdyby\Doctrine\Registry $doctrine
@@ -43,6 +47,55 @@ class GridForm extends Kdyby\Doctrine\Forms\Form
 
 
 	/**
+	 * @param \Nette\ComponentModel\IComponent $obj
+	 */
+	protected function attached($obj)
+	{
+		if ($obj instanceof Grid) {
+			$this->rows = new CollectionContainer($this->getGrid());
+			$this->addComponent($this->rows, 'entity');
+		}
+
+		if ($obj instanceof \Nette\Application\UI\Presenter) {
+			$this->getIdsContainer(); // create before signal!
+		}
+
+		parent::attached($obj);
+	}
+
+
+
+	/**
+	 * @return \Kdyby\Components\Grinder\CollectionContainer
+	 */
+	public function getRows()
+	{
+		return $this->rows;
+	}
+
+
+
+	/**
+	 * @return \Nette\Forms\Container
+	 */
+	protected function getIdsContainer()
+	{
+		if ($container = $this->getComponent('ids', FALSE)) {
+			return $container;
+		}
+
+		$container = $this->addContainer('ids');
+		$perPage = $this->getGrid()->getItemsPerPage();
+		for ($index = 0; $index < $perPage; $index++) {
+			$container->addHidden($index);
+		}
+
+		return $container;
+	}
+
+
+
+	/**
 	 * @param boolean $need
 	 *
 	 * @return \Kdyby\Components\Grinder\Grid
@@ -55,18 +108,11 @@ class GridForm extends Kdyby\Doctrine\Forms\Form
 
 
 	/**
-	 * Don't call repeatedly
-	 *
 	 * @param array $ids
 	 */
 	public function setRecordIds(array $ids)
 	{
-		$container = $this->addContainer('ids');
-		$perPage = $this->getGrid()->getPaginator()->getItemsPerPage();
-		for ($index = 0; $index < $perPage; $index++) {
-			$container->addHidden($index);
-		}
-		$container->setDefaults(array_values($ids));
+		$this->getIdsContainer()->setDefaults(array_values($ids));
 	}
 
 
@@ -76,11 +122,7 @@ class GridForm extends Kdyby\Doctrine\Forms\Form
 	 */
 	public function getRecordIds()
 	{
-		if ($container = $this->getComponent('ids', FALSE)) {
-			/** @var \Nette\Forms\Container $container */
-			return $container->getValues(TRUE);
-		}
-		return array();
+		return $this->getIdsContainer()->getValues(TRUE);
 	}
 
 }

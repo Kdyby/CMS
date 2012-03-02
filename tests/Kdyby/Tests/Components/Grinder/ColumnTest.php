@@ -147,7 +147,9 @@ class ColumnTest extends Kdyby\Tests\TestCase
 		$column = new Column($this->mockGrid(), 'my.name');
 
 		$this->assertInstanceOf('Nette\Utils\Html', $cell = $column->getCellControl());
-		$this->assertEquals(array(), $cell->attrs);
+		$this->assertEquals(array(
+			'class' => 'grinder-cell'
+		), $cell->attrs);
 	}
 
 
@@ -159,7 +161,8 @@ class ColumnTest extends Kdyby\Tests\TestCase
 
 		$this->assertInstanceOf('Nette\Utils\Html', $cell = $column->getCellControl());
 		$this->assertEquals(array(
-			'data-grinder-column' => 'my.name'
+			'class' => 'grinder-cell',
+			'data-grinder-cell' => '{"column":"my.name","item":null}'
 		), $cell->attrs);
 	}
 
@@ -173,7 +176,8 @@ class ColumnTest extends Kdyby\Tests\TestCase
 
 		$this->assertInstanceOf('Nette\Utils\Html', $cell = $column->getCellControl());
 		$this->assertEquals(array(
-			'title' => 'Some really long value'
+			'title' => 'Some really long value',
+			'class' => 'grinder-cell'
 		), $cell->attrs);
 	}
 

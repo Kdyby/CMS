@@ -1,0 +1,25 @@
+.grinder a.sort-asc:after {
+	content: ' ▲'
+}
+
+.grinder a.sort-desc:after {
+	content: ' ▼'
+}
+
+.grinder .grinder-cell input,
+.grinder .grinder-cell textarea,
+.grinder .grinder-cell select {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	background: transparent;
+}
+
+.grinder .grinder-cell input, .grinder .grinder-cell input:focus
+.grinder .grinder-cell textarea, .grinder .grinder-cell textarea:focus {
+	border: 0;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+	outline: none;
+}

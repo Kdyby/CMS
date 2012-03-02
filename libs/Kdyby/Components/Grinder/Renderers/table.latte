@@ -1,6 +1,9 @@
 {snippet}
 {block #grinder}
 
+{js '@ComponentsPackage/js/grinder.js'}
+{css '@ComponentsPackage/css/grinder.css'}
+
 {form form}
 {block #grinderTableBefore}
     {* todo: toolbar-top *}
@@ -14,8 +17,8 @@
                 <th n:gridHeader />
             </tr>
         </thead>
-        <tbody n:inner-block="#grinderRows">
-            <tr n:gridRow n:class="$iterator->odd ? odd, $iterator->even ? even" n:inner-block="#grinderRow">
+        <tbody n:inner-block="#grinderRows" n:snippet="grinder-body">
+            <tr n:gridRow n:class="$iterator->odd ? odd, $iterator->even ? even" n:snippet="grinder-row-{$item->id}" n:inner-block="#grinderRow">
                 <td n:gridCell />
             </tr>
         </tbody>

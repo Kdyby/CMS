@@ -15,7 +15,9 @@ use Kdyby;
 use Kdyby\Application\UI\Presenter;
 use Kdyby\Components\VisualPaginator\Paginator;
 use Kdyby\Doctrine\QueryBuilder;
+use Kdyby\Doctrine\Forms\EntityContainer;
 use Nette;
+use Nette\Application\Responses\JsonResponse;
 use Nette\Utils\Html;
 use Nette\Utils\Strings;
 
@@ -88,8 +90,10 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 		$this->paginator = new Paginator;
 		$this->paginator->itemsPerPage = 20;
 		$this->filters = new GridFilters($this);
-
 		$this->queryBuilder = $queryBuilder;
+
+		// configure columns
+		$this->configureEditing();
 	}
 
 
@@ -116,7 +120,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 
 	/**
-	 * @return \Doctrine\ORM\EntityRepository
+	 * @return \Kdyby\Doctrine\Dao
 	 */
 	public function getRepository()
 	{
@@ -179,6 +183,16 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	}
 
 
+
+	/**
+	 * Gets called in construction time.
+	 * When receiving signal, the rules must be already set
+	 */
+	protected function configureEditing()
+	{
+	}
+
+
 	/********************* State manipulation *********************/
 
 
@@ -217,6 +231,8 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 
 	/**
+	 * @todo: di
+	 *
 	 * @return \Nette\Http\SessionSection|\stdClass
 	 */
 	protected function getStateSession()
@@ -305,6 +321,18 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 			return new Nette\Iterators\InstanceFilter($columns, $type);
 		}
 		return $columns;
+	}
+
+
+
+	/**
+	 * @param string $name
+	 *
+	 * @return bool
+	 */
+	public function hasColumn($name)
+	{
+		return isset($this->columns[$name]);
 	}
 
 
@@ -450,6 +478,16 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 
 	/**
+	 * @return int|string
+	 */
+	public function getCurrentRecordId()
+	{
+		return $this->getIterator()->getCurrentId();
+	}
+
+
+
+	/**
 	 * @internal
 	 * @param string $paramName
 	 * @param bool $need
@@ -573,6 +611,16 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 
 	/**
+	 * @return int
+	 */
+	public function getItemsPerPage()
+	{
+		return $this->paginator->getItemsPerPage();
+	}
+
+
+
+	/**
 	 * @return \Kdyby\Components\VisualPaginator\Paginator
 	 */
 	public function getPaginator()
@@ -590,6 +638,62 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	public function getForm()
 	{
 		return $this->getComponent('form');
+	}
+
+
+
+	/**
+	 * @param int $itemId
+	 *
+	 * @throws \Kdyby\Application\BadRequestException
+	 */
+	public function handleEditable($itemId = 0)
+	{
+		/** @var \Nette\Application\Request $request */
+		$request = $this->getPresenter()->getRequest();
+		if (!$itemId && ($post = $request->getPost()) && isset($post['itemId'])) {
+			$itemId = $post['itemId'];
+		}
+
+		if (!$itemId) {
+			throw new Kdyby\Application\BadRequestException("Missing parameter \$itemId.");
+		}
+
+		$payload = array('columns' => array());
+		$rows = $this->getForm()->getRows();
+		foreach ($rows[$itemId]->getControls() as $control) {
+			/** @var \Nette\Forms\Controls\BaseControl $control */
+			$payload['columns'][$control->name] = (string)$control->getControl();
+		}
+
+		$this->sendPayload($payload);
+	}
+
+
+
+	/**
+	 * @param \Kdyby\Doctrine\Forms\EntityContainer $container
+	 *
+	 * @throws \Kdyby\InvalidArgumentException
+	 */
+	public function createColumnControls(EntityContainer $container)
+	{
+		if ($container->getForm() !== $this->getForm()) {
+			throw new Kdyby\InvalidArgumentException("Grinder form does not contain given container.");
+		}
+
+		foreach ($this->getColumns() as $column) {
+			if (!$column->editable) {
+				continue;
+			}
+
+			$class = $this->getColumnMeta($column->getName());
+			$column->createFormControl($container, $class);
+		}
+
+		if (!$this->getForm()->isSubmitted()) {
+			$this->getForm()->getMapper()->load();
+		}
 	}
 
 
@@ -619,11 +723,38 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 
 	/**
+	 * @internal
+	 * @return \Nette\Utils\Html
+	 */
+	public function getTableControl()
+	{
+		return Html::el('table', array(
+			'id' => 'grid-' . $this->lookupPath('Nette\Application\UI\Presenter'),
+			'data-grinder-edit' => $this->link("editable!")
+		));
+	}
+
+
+
+	/**
 	 * Renders grid
 	 */
 	public function render()
 	{
 		$this->getTemplate()->render();
+	}
+
+
+	/********************* Helpers *********************/
+
+
+	/**
+	 * @param array|object $payload
+	 * @throws \Nette\Application\AbortException
+	 */
+	protected function sendPayload($payload)
+	{
+		$this->getPresenter()->sendResponse(new JsonResponse($payload));
 	}
 
 
@@ -638,7 +769,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	 */
 	public static function createFromEntity(Kdyby\Doctrine\Registry $doctrine, $entityName)
 	{
-		return new static($doctrine->getDao($entityName)->createQueryBuilder('e'));
+		return new static($doctrine->getDao($entityName)->createQueryBuilder('e'), $doctrine);
 	}
 
 }

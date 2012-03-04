@@ -280,9 +280,40 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	 */
 	public function addColumn($name, $caption = NULL)
 	{
-		$column = $this->createColumn($name);
+		$column = new Column($this, $name);
 		$column->caption = $caption;
-		return $column;
+		return $this->attachColumn($column);
+	}
+
+
+
+	/**
+	 * @param string $name
+	 * @param \Nette\Forms\IControl $control
+	 * @param string|\Nette\Utils\Html $caption
+	 *
+	 * @return \Kdyby\Components\Grinder\Columns\FormColumn
+	 */
+	public function addFormColumn($name, Nette\Forms\IControl $control, $caption = NULL)
+	{
+		$column = new Columns\FormColumn($this, $name, $control);
+		$column->caption = $caption;
+		return $this->attachColumn($column);
+	}
+
+
+
+	/**
+	 * @param string $name
+	 * @param string|\Nette\Utils\Html $caption
+	 *
+	 * @return \Kdyby\Components\Grinder\Columns\CheckboxColumn
+	 */
+	public function addCheckColumn($name, $caption = NULL)
+	{
+		$column = new Columns\CheckboxColumn($this, $name);
+		$column->caption = $caption;
+		return $this->attachColumn($column);
 	}
 
 
@@ -295,7 +326,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	public function getColumn($name)
 	{
 		if (!isset($this->columns[$name])) {
-			return $this->createColumn($name);
+			return $this->addColumn($name);
 		}
 
 		return $this->columns[$name];
@@ -338,27 +369,34 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 
 	/**
-	 * @param string $name
-	 * @param string $class
+	 * @param \Kdyby\Components\Grinder\Column $column
 	 *
 	 * @return \Kdyby\Components\Grinder\Column
-	 * @throws \Kdyby\InvalidArgumentException
+	 * @throws \Kdyby\InvalidStateException
 	 */
-	private function createColumn($name, $class = 'Kdyby\Components\Grinder\Column')
+	protected function attachColumn(Column $column)
 	{
-		if (isset($this->columns[$name])) {
+		if (isset($this->columns[$name = $column->getName()])) {
 			throw new Kdyby\InvalidStateException("Column with name '$name' already exists.");
 		}
 
-		if (!is_subclass_of($class, $base = 'Kdyby\Components\Grinder\Column') && $class !== $base) {
-			throw new Kdyby\InvalidStateException('Given type "' . $class . '" is not subclass of "Kdyby\Components\Grinder\Column".');
-		}
-
-		if (!$this->isColumnNameValid($name)) {
+		if (!$this->isClassFormColumn($column) && !$this->isColumnNameValid($name)) {
 			throw new Kdyby\InvalidStateException("Column name '$name' is not valid.");
 		}
 
-		return $this->columns[$name] = new $class($this, $name);
+		return $this->columns[$name] = $column;
+	}
+
+
+
+	/**
+	 * @param string $class
+	 *
+	 * @return bool
+	 */
+	private function isClassFormColumn($class)
+	{
+		return Nette\Reflection\ClassType::from($class)->is('Kdyby\Components\Grinder\Columns\FormColumn');
 	}
 
 

@@ -8,6 +8,7 @@
 			this.element = null;
 			this.control = null;
 			this.value = null;
+			this.hasChanged = false;
 			this.lastEvent = null;
 			this.spinner = $('<img />', {
 				src:'/images/spinner.gif',
@@ -37,13 +38,17 @@
 				.html($(this.control))
 				.find(':first-child')
 				.putCursorAtEnd()
-				.keydown(callback(this, 'handleKeys'));
+				.keydown(callback(this, 'handleKeys'))
+				.trigger('inputCreated.grinder', [this]);
 		},
 		saveValue: function (event) {
 			this.lastEvent = event;
 
 			var control = this.element.find(':first-child');
+			control.trigger('inputRemoved.grinder');
 			control.attr('value', control.val());
+
+			this.hasChanged = (control.val() != this.value);
 			this.control = this.element.html();
 			this.value = control.val();
 			this.element.text(this.value);
@@ -52,6 +57,8 @@
 			this.unsetCurrent();
 		},
 		renderOriginal: function () {
+			var control = this.element.find(':first-child');
+			control.trigger('inputRemoved.grinder', [this]);
 			this.element.text(this.value);
 			this.unsetCurrent();
 		},
@@ -156,7 +163,10 @@
 		},
 		saveItem: function (cell) {
 			this.data[cell.name] = cell.value;
-			this.grid.save(this, cell);
+
+			if (cell.hasChanged) {
+				this.grid.save(this, cell);
+			}
 		},
 		nextCell:function (cell) {
 			this.cells.getNextTo(cell)
@@ -187,7 +197,8 @@
 
 			// default + user options
 			this.options = $.extend({
-				liveEdit: true
+				liveEdit: true,
+				datepicker: true
 			}, options || {});
 
 			// init
@@ -236,8 +247,33 @@
 				}
 			});
 
+			// optionally attach all required events for datepicker to work
+			if (this.options.datepicker) {
+				this.setupDatepicker();
+			}
+
 			// initialized
 			this.table.addClass('grinder-initialized');
+		},
+		setupDatepicker: function () {
+			$('body').delegate('input.date,input[date]', 'inputCreated.grinder', function (event, cell) {
+				var input = $(event.target);
+				input.datepicker({
+					dateFormat: input.data('kdyby-format'),
+					onSelect: function () {
+						cell.saveValue(event);
+					}
+				});
+				input.focus();
+			});
+
+			$('body').delegate('input.date,input[date]', 'inputRemoved.grinder', function (event) {
+				var input = $(event.target);
+				if (input.hasClass('hasDatepicker')) {
+					input.datepicker("hide");
+					input.datepicker("destroy");
+				}
+			});
 		},
 		getForm: function () {
 			return this.table.closest('form');

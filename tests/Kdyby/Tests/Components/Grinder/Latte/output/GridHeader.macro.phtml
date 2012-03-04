@@ -1,9 +1,9 @@
 <?php $_column = $column = $_grid->getColumn("author.name");$caption = $_column->caption ?>
-<th><?php echo $_column->getSortingControl()->startTag(); echo Nette\Templating\Helpers::escapeHtml($caption, ENT_NOQUOTES) ;echo $_column->getSortingControl()->endTag() ?></th>
+<th><?php echo $_column->getHeadControl()->startTag(); echo Nette\Templating\Helpers::escapeHtml($caption, ENT_NOQUOTES) ;echo $_column->getHeadControl()->endTag() ?></th>
 
 <?php foreach ($iterator = $_l->its[] = new Nette\Iterators\CachingIterator($_gridColumns) as $column): $caption = $column->caption ?>
 <th><?php echo Nette\Templating\Helpers::escapeHtml($caption, ENT_NOQUOTES) ?></th>
 <?php endforeach; array_pop($_l->its); $iterator = end($_l->its) ?>
 
 <?php $_column = $column = $_grid->getColumn("author.name");$caption = $_column->caption ?>
-<th><?php echo $_column->getSortingControl()->startTag(); echo Nette\Templating\Helpers::escapeHtml($caption, ENT_NOQUOTES) ;echo $_column->getSortingControl()->endTag() ?></th>
+<th><?php echo $_column->getHeadControl()->startTag(); echo Nette\Templating\Helpers::escapeHtml($caption, ENT_NOQUOTES) ;echo $_column->getHeadControl()->endTag() ?></th>

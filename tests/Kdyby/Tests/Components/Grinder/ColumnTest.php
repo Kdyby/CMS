@@ -162,7 +162,9 @@ class ColumnTest extends Kdyby\Tests\TestCase
 		$this->assertInstanceOf('Nette\Utils\Html', $cell = $column->getCellControl());
 		$this->assertEquals(array(
 			'class' => 'grinder-cell',
-			'data-grinder-cell' => '{"column":"my.name","item":null}'
+			'data' => array(
+				'grinder-cell' => '{"column":"my.name","item":null}'
+			)
 		), $cell->attrs);
 	}
 
@@ -186,7 +188,7 @@ class ColumnTest extends Kdyby\Tests\TestCase
 	public function testSortingControl_emptyWhenNotSortable()
 	{
 		$column = new Column($grid = $this->mockGrid(NULL, FALSE), 'my.name');
-		$this->assertEquals(Nette\Utils\Html::el(), $column->getSortingControl());
+		$this->assertEquals(Nette\Utils\Html::el(), $column->getHeadControl());
 	}
 
 
@@ -201,7 +203,7 @@ class ColumnTest extends Kdyby\Tests\TestCase
 			->with($this->equalTo('sort!'), $this->equalTo(array('sort' => array('my.name' => 'asc'))))
 			->will($this->returnValue('http://...'));
 
-		$this->assertInstanceOf('Nette\Utils\Html', $sorting = $column->getSortingControl());
+		$this->assertInstanceOf('Nette\Utils\Html', $sorting = $column->getHeadControl());
 		$this->assertEquals(array(
 			'href' => 'http://...',
 			'class' => 'ajax sortable sort-none'
@@ -220,7 +222,7 @@ class ColumnTest extends Kdyby\Tests\TestCase
 			->with($this->equalTo('sort!'), $this->equalTo(array('sort' => array('my.name' => 'desc'))))
 			->will($this->returnValue('http://...'));
 
-		$this->assertInstanceOf('Nette\Utils\Html', $sorting = $column->getSortingControl());
+		$this->assertInstanceOf('Nette\Utils\Html', $sorting = $column->getHeadControl());
 		$this->assertEquals(array(
 			'href' => 'http://...',
 			'class' => 'ajax sortable sort-asc'
@@ -239,7 +241,7 @@ class ColumnTest extends Kdyby\Tests\TestCase
 			->with($this->equalTo('sort!'), $this->equalTo(array('sort' => array('my.name' => 'none'))))
 			->will($this->returnValue('http://...'));
 
-		$this->assertInstanceOf('Nette\Utils\Html', $sorting = $column->getSortingControl());
+		$this->assertInstanceOf('Nette\Utils\Html', $sorting = $column->getHeadControl());
 		$this->assertEquals(array(
 			'href' => 'http://...',
 			'class' => 'ajax sortable sort-desc'

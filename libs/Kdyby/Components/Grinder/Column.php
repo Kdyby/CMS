@@ -11,7 +11,6 @@
 namespace Kdyby\Components\Grinder;
 
 use Kdyby;
-use Kdyby\Components\Grinder;
 use Kdyby\Doctrine\Forms\EntityContainer;
 use Kdyby\Doctrine\QueryBuilder;
 use Kdyby\Doctrine\Mapping\ClassMetadata;
@@ -79,7 +78,7 @@ class Column extends Nette\Object
 	 * @param \Kdyby\Components\Grinder\Grid $grid
 	 * @param string $name
 	 */
-	public function __construct(Grinder\Grid $grid, $name)
+	public function __construct(Grid $grid, $name)
 	{
 		$this->grid = $grid;
 		$this->name = $name;
@@ -108,15 +107,17 @@ class Column extends Nette\Object
 
 
 	/**
+	 * @param bool $need
+	 *
 	 * @return mixed
 	 */
-	final public function getValue()
+	public function getValue($need = TRUE)
 	{
 		if ($this->value) {
 			return $this->value;
 		}
 
-		$value = $this->grid->getRecordProperty($this->name);
+		$value = $this->grid->getRecordProperty($this->name, $need);
 		foreach ($this->filters as $filter) {
 			$value = $filter($value, $this->grid);
 		}
@@ -157,7 +158,7 @@ class Column extends Nette\Object
 	 */
 	public function createFormControl(EntityContainer $container, ClassMetadata $class)
 	{
-		if (!$this->editable) {
+		if (!$this->isEditable()) {
 			return;
 		}
 
@@ -184,6 +185,18 @@ class Column extends Nette\Object
 		} else { // $class is current
 
 		}
+
+		$container[$field]->setAttribute('autocomplete', 'off');
+	}
+
+
+
+	/**
+	 * @return bool
+	 */
+	public function isEditable()
+	{
+		return $this->editable;
 	}
 
 
@@ -231,23 +244,24 @@ class Column extends Nette\Object
 	 */
 	public function getCellControl()
 	{
-		$attrs = array(
-			'class' => 'grinder-cell',
-		);
+		$el = Html::el('td')->class('grinder-cell');
 
-		if ($this->editable){
-			$attrs['data-grinder-cell'] = Json::encode(array(
+		if ($this->isEditable()){
+			$el->data('grinder-cell', Json::encode(array(
 				'column' => $this->name,
 				'item' => $this->getGrid()->getCurrentRecordId()
-			));
+			)));
 		}
 
 		$value = $this->getValue();
 		if ($this->fullLengthValue) {
-			$attrs['title'] = Strings::truncate($this->fullLengthValue, $this->maxTitleLength);
+			$el->title = Strings::truncate($this->fullLengthValue, $this->maxTitleLength);
+		}
+		if (is_scalar($value)) {
+			$el->setText($value);
 		}
 
-		return Html::el('td', $attrs)->setText($value);
+		return $el;
 	}
 
 
@@ -256,7 +270,7 @@ class Column extends Nette\Object
 	 * @internal
 	 * @return \Nette\Utils\Html
 	 */
-	public function getSortingControl()
+	public function getHeadControl()
 	{
 		if (!$this->isSortable()) {
 			return Html::el();
@@ -270,7 +284,7 @@ class Column extends Nette\Object
 		return Html::el('a', array(
 			'href' => $this->grid->lazyLink('sort!', array('sort' => $this->getSorting())),
 			'class' => implode(' ', $class)
-		));
+		))->setText($this->caption);
 	}
 
 

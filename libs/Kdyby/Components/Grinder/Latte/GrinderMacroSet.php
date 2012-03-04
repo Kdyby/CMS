@@ -118,8 +118,8 @@ class GrinderMacroSet extends Nette\Latte\Macros\MacroSet
 	 */
 	private function wrapHeaderContent(MacroNode $node)
 	{
-		$start = '<?php echo $_column->getSortingControl()->startTag(); ?>';
-		$end = '<?php echo $_column->getSortingControl()->endTag(); ?>';
+		$start = '<?php echo $_column->getHeadControl()->startTag(); ?>';
+		$end = '<?php echo $_column->getHeadControl()->endTag(); ?>';
 		return $this->createTagContainer($node, $start, $end);
 	}
 

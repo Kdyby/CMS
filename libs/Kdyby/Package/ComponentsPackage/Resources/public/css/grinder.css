@@ -23,3 +23,7 @@
 	box-shadow: none;
 	outline: none;
 }
+
+.grinder input.select-all {
+	display:none;
+}

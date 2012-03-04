@@ -10,8 +10,8 @@
 
 namespace Kdyby\Components\Grinder;
 
-use Nette;
 use Kdyby;
+use Nette;
 
 
 
@@ -61,6 +61,22 @@ class GridForm extends Kdyby\Doctrine\Forms\Form
 		}
 
 		parent::attached($obj);
+	}
+
+
+
+	/**
+	 * @param string $column
+	 *
+	 * @return \Nette\Forms\Container
+	 */
+	public function getColumnContainer($column)
+	{
+		$column = str_replace('.', '__', $column);
+		if (!$container = $this['columns']->getComponent($column, FALSE)) {
+			$container = $this['columns']->addContainer($column);
+		}
+		return $container;
 	}
 
 

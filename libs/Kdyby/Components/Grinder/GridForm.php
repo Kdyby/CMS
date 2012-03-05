@@ -12,6 +12,7 @@ namespace Kdyby\Components\Grinder;
 
 use Kdyby;
 use Nette;
+use Nette\Forms\Controls\SubmitButton;
 
 
 
@@ -71,7 +72,7 @@ class GridForm extends Kdyby\Doctrine\Forms\Form
 	 */
 	protected function attached($obj)
 	{
-		if ($obj instanceof \Nette\Application\UI\Presenter) {
+		if ($obj instanceof Nette\Application\UI\Presenter) {
 			// build all form column controls
 			foreach ($this->getFormColumns() as $column) {
 				$column->buildControls($this);
@@ -79,9 +80,37 @@ class GridForm extends Kdyby\Doctrine\Forms\Form
 
 			// force create before signal!
 			$this->getIdsContainer();
+
+			// wrap all click calls
+			$this->wrapToolbarCallbacks();
 		}
 
 		parent::attached($obj);
+	}
+
+
+
+	/**
+	 * Wrap all click calls
+	 */
+	protected function wrapToolbarCallbacks()
+	{
+		$selectColumn = $this->getSelectColumn();
+		foreach ($this->getToolbar()->getControls() as $control) {
+			if (!$control instanceof SubmitButton) {
+				continue;
+			}
+
+			$onClick = array();
+			/** @var Nette\Forms\Controls\SubmitButton $control */
+			foreach ($control->onClick as $callback) {
+				$onClick[] = function (SubmitButton $button) use ($callback, $selectColumn) {
+					/** @var \Kdyby\Components\Grinder\Columns\CheckboxColumn $selectColumn */
+					callback($callback)->invoke($selectColumn->createResult(), $button);
+				};
+			}
+			$control->onClick = $onClick;
+		}
 	}
 
 
@@ -102,6 +131,17 @@ class GridForm extends Kdyby\Doctrine\Forms\Form
 	public function getToolbar()
 	{
 		return $this->getComponent('toolbar');
+	}
+
+
+
+	/**
+	 * @return \Kdyby\Components\Grinder\Columns\CheckboxColumn
+	 */
+	public function getSelectColumn()
+	{
+		$checks = iterator_to_array($this->getGrid()->getColumns('Kdyby\Components\Grinder\Columns\CheckboxColumn'));
+		return reset($checks);
 	}
 
 

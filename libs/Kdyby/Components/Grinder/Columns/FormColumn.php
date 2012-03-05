@@ -61,13 +61,32 @@ class FormColumn extends Kdyby\Components\Grinder\Column
 
 
 	/**
+	 * @return \Kdyby\Components\Grinder\GridForm
+	 */
+	public function getForm()
+	{
+		return $this->getGrid()->getForm();
+	}
+
+
+
+	/**
+	 * @return \Nette\Forms\Container
+	 */
+	protected function getFormContainer()
+	{
+		return $this->getForm()->getColumnContainer($this->getName());
+	}
+
+
+
+	/**
 	 * @return \Nette\Forms\Controls\BaseControl
 	 */
 	protected function getIteratedControl()
 	{
-		$form = $this->getGrid()->getForm();
-		$container = $form->getColumnContainer($this->getName());
-		return $container[$this->getGrid()->getCurrentIndex()];
+		return $this->getFormContainer()
+			->getComponent($this->getGrid()->getCurrentIndex());
 	}
 
 
@@ -80,7 +99,7 @@ class FormColumn extends Kdyby\Components\Grinder\Column
 	public function getControl($need = FALSE)
 	{
 		$control = $this->getIteratedControl()->getControl();
-		if (!$this->getGrid()->getForm()->isSubmitted()){
+		if (!$this->getForm()->isSubmitted()){
 			$control->setValue(parent::getValue($need));
 		}
 		return $control;

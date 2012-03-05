@@ -37,6 +37,8 @@ class GridIterator extends \IteratorIterator
 	/**
 	 * @param \Kdyby\Components\Grinder\Grid $grid
 	 * @param \Kdyby\Doctrine\QueryBuilder $queryBuilder
+	 *
+	 * @throws \Kdyby\Doctrine\QueryException
 	 */
 	public function __construct(Grid $grid, QueryBuilder $queryBuilder)
 	{
@@ -60,18 +62,7 @@ class GridIterator extends \IteratorIterator
 		$queryBuilder->setFirstResult($this->grid->getPaginator()->getOffset());
 
 		// sorting
-		foreach ((array)$this->grid->sort as $column => $type) {
-			if ($type === 'none') {
-				continue;
-			}
-
-			if ($column = $this->grid->getColumn($column)->getQueryExpr($queryBuilder)) {
-				$queryBuilder->addOrderBy($column, $type === 'desc' ? 'DESC' : 'ASC');
-
-			} else {
-				unset($this->grid->sort[$column]);
-			}
-		}
+		$grid->sortQuery($queryBuilder);
 
 		// read items
 		$query = $queryBuilder->getQuery();

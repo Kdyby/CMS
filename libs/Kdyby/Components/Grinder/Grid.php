@@ -85,6 +85,8 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	/**
 	 * @param \Kdyby\Doctrine\Registry $doctrine
 	 * @param \Kdyby\Doctrine\QueryBuilder $queryBuilder
+	 *
+	 * @throws \Kdyby\UnexpectedValueException
 	 */
 	public function __construct(Registry $doctrine, QueryBuilder $queryBuilder = NULL)
 	{
@@ -198,9 +200,14 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	 * When no QueryBuilder is provided, this method is asked to return one.
 	 *
 	 * @param \Kdyby\Doctrine\Registry $doctrine
+	 *
+	 * @throws \Kdyby\NotImplementedException
+	 * @return \Kdyby\Doctrine\QueryBuilder
 	 */
 	protected function createQuery(Kdyby\Doctrine\Registry $doctrine)
 	{
+		$method = get_called_class() . '::createQuery()';
+		throw new Kdyby\NotImplementedException("Please provide a Kdyby\\Doctrine\\QueryBuilder instance, or implement $method.");
 	}
 
 
@@ -556,6 +563,21 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	}
 
 
+
+	/**
+	 * @internal
+	 * @param \Kdyby\Components\Grinder\SelectedResults $results
+	 */
+	public function bindFilteredQuery(SelectedResults $results)
+	{
+		$qb = clone $this->queryBuilder;
+		$qb->setParameters($qb->getParameters());
+		$this->getFilters()->apply($qb);
+		$this->sortQuery($qb);
+		$results->bindItemsQuery($qb);
+	}
+
+
 	/********************* Sorting *********************/
 
 
@@ -599,6 +621,28 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 		} catch (Kdyby\InvalidStateException $e) {
 			return FALSE;
+		}
+	}
+
+
+
+	/**
+	 * @internal
+	 * @param \Kdyby\Doctrine\QueryBuilder $queryBuilder
+	 */
+	public function sortQuery(QueryBuilder $queryBuilder)
+	{
+		foreach ((array)$this->sort as $column => $type) {
+			if ($type === 'none') {
+				continue;
+			}
+
+			if ($column = $this->getColumn($column)->getQueryExpr($queryBuilder)) {
+				$queryBuilder->addOrderBy($column, $type === 'desc' ? 'DESC' : 'ASC');
+
+			} else {
+				unset($this->sort[$column]);
+			}
 		}
 	}
 
@@ -718,7 +762,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	/**
 	 * @return bool
 	 */
-	public function getEditable()
+	public function isEditable()
 	{
 		foreach ($this->getColumns() as $column) {
 			if ($column->editable) {

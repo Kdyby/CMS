@@ -36,6 +36,44 @@ class CheckboxColumn extends FormColumn
 
 
 	/**
+	 * @return \Kdyby\Components\Grinder\SelectedResults
+	 */
+	public function createResult()
+	{
+		$all = $this->isSelectedAll();
+		$ids = $all ? NULL : $this->getSelectedIds();
+		$result = new Grinder\SelectedResults($this->getGrid(), $all, $ids);
+		return $result;
+	}
+
+
+
+	/**
+	 * @return array
+	 */
+	public function getSelectedIds()
+	{
+		$container = $this->getFormContainer();
+		$selectedIndexes = $container->getValues(TRUE);
+		$selected = array_combine($this->getForm()->getRecordIds(), $selectedIndexes);
+		return array_keys(array_filter($selected));
+	}
+
+
+
+	/**
+	 * @return bool
+	 */
+	public function isSelectedAll()
+	{
+		/** @var \Nette\Forms\Controls\Checkbox $check */
+		$check = $this->getForm()->getComponent('checkAll');
+		return (bool)$check->getValue();
+	}
+
+
+
+	/**
 	 * @param bool $need
 	 *
 	 * @return \Nette\Utils\Html

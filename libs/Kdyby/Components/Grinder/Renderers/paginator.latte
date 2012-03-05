@@ -4,26 +4,30 @@
  *}
 
 {if $paginator->pageCount > 1}
-<div class="paginator">
-	{if $paginator->isFirst()}
-	<span class="button">« Previous</span>
-	{else}
-	<a href="{link paginate!, $paginator->page - 1}" class="ajax">« Previous</a>
-	{/if}
+<ul class="pagination" id="{$paginatorId}" data-grinder-pagecount="{$paginator->pageCount}" data-grinder-page="{$paginator->page}">
+    <li n:class="$paginator->first ? disabled">
+        {if !$paginator->first}
+            <a href="{link paginate!, $paginator->page - 1}" data-grinder-page="{=$paginator->page - 1}" class="ajax">« Previous</a>
+        {else}
+            <a href="#">« Previous</a>
+        {/if}
+    </li>
 
-	{foreach $paginator->getPagesListFriendly() as $step}
-	{if $step == $paginator->page}
-		<span class="current">{$step}</span>
-	{else}
-		<a href="{link paginate!, $step}" class="ajax">{$step}</a>
-	{/if}
-	{if $iterator->nextValue > $step + 1}<span>…</span>{/if}
-	{/foreach}
+    <li n:foreach="$paginator->pagesListFriendly as $step" n:class="$step == $paginator->page ? disabled">
+        {if !$paginator->isCurrent($step)}
+            <a href="{link paginate!, $step}" data-grinder-page="{$step}" class="ajax">{$step}</a>
+        {else}
+            <a href="#">{$step}</a>
+        {/if}
+        <a href="#" n:if="$iterator->nextValue > $step + 1">…</a>
+    </li>
 
-	{if $paginator->isLast()}
-	<span class="button">Next »</span>
-	{else}
-	<a href="{link paginate!, $paginator->page + 1}" class="ajax">Next »</a>
-	{/if}
-</div>
+    <li n:class="$paginator->last ? disabled">
+        {if !$paginator->last}
+            <a href="{link paginate!, $paginator->page + 1}" data-grinder-page="{=$paginator->page + 1}" class="ajax">Next »</a>
+        {else}
+            <a href="#">Next »</a>
+        {/if}
+    </li>
+</ul>
 {/if}

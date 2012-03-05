@@ -42,6 +42,21 @@ class GridForm extends Kdyby\Doctrine\Forms\Form
 	{
 		$this->addContainer('columns');
 		$this->addContainer('toolbar');
+
+		// for javascript to select all rows
+		$this->addCheckbox('checkAll', 'Select all %d results')
+			->setDefaultValue(FALSE);
+	}
+
+
+
+	/**
+	 * @param int $count
+	 */
+	public function setTotalResults($count)
+	{
+		$this['checkAll']->setAttribute('data-grinder-checkAll', $count);
+		$this['checkAll']->caption = str_replace('%d', $count, $this['checkAll']->caption);
 	}
 
 

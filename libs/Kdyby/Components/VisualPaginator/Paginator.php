@@ -45,4 +45,16 @@ class Paginator extends Nette\Utils\Paginator
 		return $steps;
 	}
 
+
+
+	/**
+	 * @param int $page
+	 *
+	 * @return bool
+	 */
+	public function isCurrent($page)
+	{
+		return $this->page == $page;
+	}
+
 }

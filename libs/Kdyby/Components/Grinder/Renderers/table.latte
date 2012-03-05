@@ -21,6 +21,10 @@
             <tr n:gridRow n:class="$iterator->odd ? odd, $iterator->even ? even" n:snippet="grinder-row-{$item->id}" n:inner-block="#grinderRow">
                 <td n:gridCell />
             </tr>
+            <tr class="checkAll">
+                <td><input n:input="checkAll"/></td>
+                <td colspan="{=count($grid->columns) - 1}">{label checkAll /}</td>
+            </tr>
         </tbody>
     </table>
 

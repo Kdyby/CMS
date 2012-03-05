@@ -755,7 +755,18 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 		}
 
 		$template->paginator = $this->getPaginator();
+		$template->paginatorId = $this->getHtmlId() . '-paginator';
 		return $template;
+	}
+
+
+
+	/**
+	 * @return string
+	 */
+	public function getHtmlId()
+	{
+		return 'grid-' . $this->lookupPath('Nette\Application\UI\Presenter');
 	}
 
 
@@ -767,7 +778,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	public function getTableControl()
 	{
 		return Html::el('table', array(
-			'id' => 'grid-' . $this->lookupPath('Nette\Application\UI\Presenter'),
+			'id' => $this->getHtmlId(),
 			'data-grinder-edit' => $this->link("editable!")
 		));
 	}

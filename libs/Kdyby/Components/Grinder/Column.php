@@ -185,8 +185,6 @@ class Column extends Nette\Object
 		} else { // $class is current
 
 		}
-
-		$container[$field]->setAttribute('autocomplete', 'off');
 	}
 
 

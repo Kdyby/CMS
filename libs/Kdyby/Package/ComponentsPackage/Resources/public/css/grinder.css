@@ -27,3 +27,18 @@
 .grinder input.select-all {
 	display:none;
 }
+
+.grinder tr.checkAll {
+	display: none;
+}
+
+.grinder tr.checkAll td:first-child {
+	width: 17px;
+	text-align:center;
+}
+
+.grinder tr.checkAll label {
+	padding: 0;
+	margin: 0;
+	font-size:inherit;
+}

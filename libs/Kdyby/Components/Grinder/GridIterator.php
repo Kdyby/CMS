@@ -83,12 +83,16 @@ class GridIterator extends \IteratorIterator
 		}
 
 		// items ids to form
+		$form = $this->grid->getForm();
 		$class = $this->getClass();
-		$this->grid->getForm()->setRecordIds(array_map(function ($item) use ($class) {
+		$form->setRecordIds(array_map(function ($item) use ($class) {
 			/** @var \Kdyby\Doctrine\Mapping\ClassMetadata $class */
 			$id = $class->getIdentifierValues($item);
 			return reset($id);
 		}, $this->getItems()));
+
+		// to allow checkAll functionality
+		$form->setTotalResults($this->getTotalCount());
 	}
 
 

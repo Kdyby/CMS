@@ -36,21 +36,21 @@ class FormColumn extends Kdyby\Components\Grinder\Column
 	{
 		parent::__construct($grid, $name);
 		$this->control = $control;
-		$this->buildControls();
 	}
 
 
 
 	/**
+	 * @internal
+	 * @param \Kdyby\Components\Grinder\GridForm $form
 	 * @throws \Kdyby\InvalidStateException
 	 */
-	protected function buildControls()
+	public function buildControls(Grinder\GridForm $form)
 	{
 		if ($parent = $this->control->parent) {
 			throw new Kdyby\InvalidStateException("Given form control is already attached to component.");
 		}
 
-		$form = $this->getGrid()->getForm();
 		/** @var \Nette\Forms\Container $container */
 		$container = $form->getColumnContainer($this->getName());
 		foreach ($form->getRecordIds() as $index => $id) {

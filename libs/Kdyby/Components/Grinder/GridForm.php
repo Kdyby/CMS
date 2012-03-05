@@ -27,11 +27,16 @@ class GridForm extends Kdyby\Doctrine\Forms\Form
 
 	/**
 	 * @param \Kdyby\Doctrine\Registry $doctrine
+	 * @param \Kdyby\Components\Grinder\Grid $grid
 	 */
-	public function __construct(Kdyby\Doctrine\Registry $doctrine)
+	public function __construct(Kdyby\Doctrine\Registry $doctrine, Grid $grid)
 	{
 		parent::__construct($doctrine);
 		$this->monitor('Kdyby\Components\Grinder\Grid');
+
+		// editable rows
+		$this->rows = new CollectionContainer($grid);
+		$this->addComponent($this->rows, 'entity');
 	}
 
 
@@ -66,16 +71,37 @@ class GridForm extends Kdyby\Doctrine\Forms\Form
 	 */
 	protected function attached($obj)
 	{
-		if ($obj instanceof Grid) {
-			$this->rows = new CollectionContainer($this->getGrid());
-			$this->addComponent($this->rows, 'entity');
-		}
-
 		if ($obj instanceof \Nette\Application\UI\Presenter) {
-			$this->getIdsContainer(); // create before signal!
+			// build all form column controls
+			foreach ($this->getFormColumns() as $column) {
+				$column->buildControls($this);
+			}
+
+			// force create before signal!
+			$this->getIdsContainer();
 		}
 
 		parent::attached($obj);
+	}
+
+
+
+	/**
+	 * @return \Kdyby\Components\Grinder\Columns\FormColumn[]
+	 */
+	protected function getFormColumns()
+	{
+		return $this->getGrid()->getColumns('Kdyby\Components\Grinder\Columns\FormColumn');
+	}
+
+
+
+	/**
+	 * @return \Nette\Forms\Container
+	 */
+	public function getToolbar()
+	{
+		return $this->getComponent('toolbar');
 	}
 
 

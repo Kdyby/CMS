@@ -12,7 +12,6 @@ namespace Kdyby\Components\Grinder;
 
 use Doctrine;
 use Kdyby;
-use Kdyby\Application\UI\Presenter;
 use Kdyby\Components\VisualPaginator\Paginator;
 use Kdyby\Doctrine\QueryBuilder;
 use Kdyby\Doctrine\Forms\EntityContainer;
@@ -55,6 +54,9 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	/** @var \Kdyby\Doctrine\QueryBuilder */
 	private $queryBuilder;
 
+	/** @var \Kdyby\Doctrine\Registry */
+	private $doctrine;
+
 	/** @var \Kdyby\Components\Grinder\Column[] */
 	private $columns = array();
 
@@ -86,7 +88,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	{
 		parent::__construct();
 
-		$this->addComponent(new GridForm($doctrine), 'form');
+		$this->doctrine = $doctrine;
 		$this->paginator = new Paginator;
 		$this->paginator->itemsPerPage = 20;
 		$this->filters = new GridFilters($this);
@@ -99,22 +101,12 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 
 	/**
-	 * @return \Doctrine\ORM\EntityManager
-	 */
-	protected function getEntityManager()
-	{
-		return $this->queryBuilder->getEntityManager();
-	}
-
-
-
-	/**
 	 * @return \Kdyby\Doctrine\Mapping\ClassMetadata
 	 */
 	protected function getClass()
 	{
 		$class = $this->queryBuilder->getRootEntity();
-		return $this->getEntityManager()->getClassMetadata($class);
+		return $this->doctrine->getClassMetadata($class);
 	}
 
 
@@ -125,7 +117,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	public function getRepository()
 	{
 		$class = $this->queryBuilder->getRootEntity();
-		return $this->getEntityManager()->getRepository($class);
+		return $this->doctrine->getDao($class);
 	}
 
 
@@ -144,6 +136,11 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 			return;
 		}
 
+		// create grid form
+		if (!$gridForm = $this->getComponent('form', FALSE)) {
+			$gridForm = new GridForm($this->doctrine, $this);
+		}
+
 		// macros
 		$context = $this->getPresenter()->getContext();
 		$this->setTemplateConfigurator($context->kdyby->templateConfigurator);
@@ -153,8 +150,13 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 		$this->paginator->setPage($this->page);
 
 		// configure
-		$this->configure($this->getPresenter());
+		$this->configure($this->getPresenter(), $gridForm->getToolbar());
 		$this->configureFilters($this->getPresenter());
+
+		// attach form later than grid
+		if (!$this->getComponent('form', FALSE)) {
+			$this->addComponent($gridForm, 'form');
+		}
 
 		// validate sorting
 		if ($this->disableSorting) {
@@ -177,8 +179,9 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	 * Gets called on the right time for adding columns and actions
 	 *
 	 * @param \Kdyby\Application\UI\Presenter $presenter
+	 * @param \Nette\Forms\Container $toolbar
 	 */
-	protected function configure(Presenter $presenter)
+	protected function configure(Kdyby\Application\UI\Presenter $presenter, Nette\Forms\Container $toolbar)
 	{
 	}
 
@@ -264,7 +267,7 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	/**
 	 * @param \Kdyby\Application\UI\Presenter $presenter
 	 */
-	protected function configureFilters(Presenter $presenter)
+	protected function configureFilters(Kdyby\Application\UI\Presenter $presenter)
 	{
 	}
 
@@ -411,10 +414,9 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	public function isColumnNameValid($name, $isField = FALSE)
 	{
 		$class = $this->getClass();
-		$em = $this->getEntityManager();
 		foreach (explode('.', $name) as $field) {
 			if ($class->hasAssociation($field)) {
-				$class = $em->getClassMetadata($class->getAssociationTargetClass($field));
+				$class = $this->doctrine->getClassMetadata($class->getAssociationTargetClass($field));
 
 			} elseif ($class->hasField($field)) {
 				return TRUE;
@@ -437,10 +439,9 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	private function getColumnMeta($name)
 	{
 		$class = $this->getClass();
-		$em = $this->getEntityManager();
 		foreach (explode('.', $name) as $field) {
 			if ($class->hasAssociation($field)) {
-				$class = $em->getClassMetadata($class->getAssociationTargetClass($field));
+				$class = $this->doctrine->getClassMetadata($class->getAssociationTargetClass($field));
 
 			} elseif ($class->hasField($field)) {
 				return $class;

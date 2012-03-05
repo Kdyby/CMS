@@ -107,7 +107,10 @@ class SelectedResults extends Nette\Object
 		$qb->setParameters($this->queryBuilder->getParameters());
 		$qb->resetDQLPart('select');
 		$qb->addSelect($qb->getRootAlias() . '.' . $this->getPrimary());
-		return $qb->getQuery()->getArrayResult();
+
+		return array_map(function ($row) {
+			return reset($row);
+		}, $qb->getQuery()->getArrayResult());
 	}
 
 

@@ -11,6 +11,7 @@
 namespace Kdyby\Components\Grinder;
 
 use Doctrine;
+use Kdyby\Doctrine\Registry;
 use Kdyby;
 use Kdyby\Components\VisualPaginator\Paginator;
 use Kdyby\Doctrine\QueryBuilder;
@@ -28,6 +29,7 @@ use Nette\Utils\Strings;
  * @property-write int $itemsPerPage
  * @property-read object $current
  * @property-read int $currentIndex
+ * @property array|bool $editable
  * @property \Kdyby\Components\Grinder\GridFilters|\Kdyby\Components\Grinder\GridFiltersFluent[] $filters
  */
 class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \Countable
@@ -81,10 +83,10 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 
 	/**
-	 * @param \Kdyby\Doctrine\QueryBuilder $queryBuilder
 	 * @param \Kdyby\Doctrine\Registry $doctrine
+	 * @param \Kdyby\Doctrine\QueryBuilder $queryBuilder
 	 */
-	public function __construct(QueryBuilder $queryBuilder, Kdyby\Doctrine\Registry $doctrine)
+	public function __construct(Registry $doctrine, QueryBuilder $queryBuilder = NULL)
 	{
 		parent::__construct();
 
@@ -92,10 +94,15 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 		$this->paginator = new Paginator;
 		$this->paginator->itemsPerPage = 20;
 		$this->filters = new GridFilters($this);
-		$this->queryBuilder = $queryBuilder;
 
-		// configure columns
-		$this->configureEditing();
+		if ($queryBuilder === NULL) {
+			$queryBuilder = $this->createQuery($doctrine);
+			if (!$queryBuilder instanceof QueryBuilder) {
+				$method = get_called_class() . '::createQuery()';
+				throw new Kdyby\UnexpectedValueException("Value returned from $method is not instance of Kdyby\\Doctrine\\QueryBuilder.");
+			}
+		}
+		$this->queryBuilder = $queryBuilder;
 	}
 
 
@@ -188,10 +195,11 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 
 
 	/**
-	 * Gets called in construction time.
-	 * When receiving signal, the rules must be already set
+	 * When no QueryBuilder is provided, this method is asked to return one.
+	 *
+	 * @param \Kdyby\Doctrine\Registry $doctrine
 	 */
-	protected function configureEditing()
+	protected function createQuery(Kdyby\Doctrine\Registry $doctrine)
 	{
 	}
 
@@ -345,7 +353,12 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	public function getColumns($type = NULL)
 	{
 		if (!$this->columns) {
-			foreach ($this->getClass()->getFieldNames() as $fieldName) {
+			$class = $this->getClass();
+			foreach ($class->getFieldNames() as $fieldName) {
+				if ($class->isIdentifier($fieldName)) {
+					continue;
+				}
+
 				$this->getColumn($fieldName)->caption = ucFirst($fieldName);
 			}
 		}
@@ -680,6 +693,42 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	}
 
 
+	/********************* Editable *********************/
+
+
+	/**
+	 * @param array|bool $editable
+	 */
+	public function setEditable($editable)
+	{
+		if (is_bool($editable)) {
+			foreach ($this->getColumns() as $column) {
+				$column->editable = $editable;
+			}
+
+		} else {
+			foreach ($editable as $column) {
+				$this->getColumn($column)->editable = TRUE;
+			}
+		}
+	}
+
+
+
+	/**
+	 * @return bool
+	 */
+	public function getEditable()
+	{
+		foreach ($this->getColumns() as $column) {
+			if ($column->editable) {
+				return TRUE;
+			}
+		}
+		return FALSE;
+	}
+
+
 
 	/**
 	 * @param int $itemId
@@ -817,9 +866,9 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 	 *
 	 * @return \Kdyby\Components\Grinder\Grid
 	 */
-	public static function createFromEntity(Kdyby\Doctrine\Registry $doctrine, $entityName)
+	public static function createFromEntity(Registry $doctrine, $entityName)
 	{
-		return new static($doctrine->getDao($entityName)->createQueryBuilder('e'), $doctrine);
+		return new static($doctrine, $doctrine->getDao($entityName)->createQueryBuilder('e'));
 	}
 
 }

@@ -129,7 +129,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 * @param bool $reverse
 	 * @param string $separator
 	 *
-	 * @return \Kdyby\Components\HeaderControl
+	 * @return \Kdyby\Components\Header\HeaderControl
 	 */
 	public function setTitle($title, $reverse = NULL, $separator = NULL)
 	{
@@ -149,7 +149,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 
 	/**
 	 * @param string $title
-	 * @return \Kdyby\Components\HeaderControl
+	 * @return \Kdyby\Components\Header\HeaderControl
 	 */
 	public function addTitle($title)
 	{

@@ -6,13 +6,7 @@
 
 {form form}
 {block #grinderTableBefore}
-    {block #grinderToolbarTop}{if}
-        <fieldset n:formContainer="toolbar" class="control-group">
-            {foreach $form->toolbar->controls as $button}
-                {block #grinderToolbarButton}{input $button->name, class => "btn"}{/block}
-            {/foreach}
-        </fieldset>
-    {/if $iterations}{/block}
+    {block #grinderToolbarTop}{include 'toolbar.latte', _form => $_form, form => $form}{/block}
     {block #grinderPaginatorTop}{/block}
 {/block}
 
@@ -46,7 +40,7 @@
 {/if}
 
 {block #grinderTableAfter}
-    {block #grinderToolbarBottom}{/block}
+    {block #grinderToolbarBottom}{include 'toolbar.latte', _form => $_form, form => $form}{/block}
     {block #grinderPaginatorBottom}{include 'paginator.latte'}{/block}
 {/block}
 {/form}

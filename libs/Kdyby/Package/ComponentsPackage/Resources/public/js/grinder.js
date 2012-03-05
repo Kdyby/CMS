@@ -448,7 +448,7 @@
 
 			// rows can be selected
 			this.table.delegate('tr', 'click', function (event) {
-				if (/input|select|textarea|button/i.test(event.target.tagName)) {
+				if (!/td|tr|th/i.test(event.target.tagName)) {
 					return;
 				}
 

@@ -1,0 +1,7 @@
+{if}
+    <fieldset n:formContainer="toolbar" class="control-group">
+        {foreach $form->toolbar->controls as $button}
+                    {block #grinderToolbarButton}{input $button->name, class => "btn"}{/block}
+                {/foreach}
+    </fieldset>
+{/if $iterations}

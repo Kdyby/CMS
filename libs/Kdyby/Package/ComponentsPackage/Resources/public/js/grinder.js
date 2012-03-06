@@ -482,8 +482,8 @@
 					.find('input[data-grinder-check-all="' + rowCheck.data('grinder-check-row') + '"]');
 
 				checkAll.attr('checked', false);
-				me.getCheckAllRow().hide();
 				me.setCheckedAll(false);
+				me.setCheckAllRowVisibility(false);
 			});
 
 			// submit data when sorting
@@ -536,26 +536,27 @@
 			var checks = check.closest('.grinder').find('input[data-grinder-check-row="' + column + '"]');
 			if (check.is(':checked')) {
 				checks.attr('checked', true);
-				this.getCheckAllRow().show();
+				this.setCheckAllRowVisibility(true);
 
 			} else {
 				checks.attr('checked', false);
-				this.getCheckAllRow().hide();
-				this.setCheckedAll(false);
+				this.setCheckAllRowVisibility(false);
 			}
 		},
-		getCheckAllRow: function () {
-			if (!this.table.is('table')) {
-				return $('<tr />');
+		setCheckAllRowVisibility: function (visible) {
+			if (!this.checkAllRow) {
+				this.checkAllRow = this.table.find('.checkAll');
 			}
 
-			if (this.checkAllRow) {
-				return this.checkAllRow;
-			}
+			if (visible === true) {
+				this.checkAllRow.prependTo(this.table.find('tbody'));
+				this.checkAllRow.show();
 
-			this.checkAllRow = this.table.find('.checkAll');
-			this.checkAllRow.prependTo(this.table.find('tbody'));
-			return this.checkAllRow;
+			} else {
+				this.setCheckedAll(false);
+				this.checkAllRow.appendTo(this.table.find('tbody'));
+				this.checkAllRow.hide();
+			}
 		},
 		setCheckedAll: function (value) {
 			this.table

@@ -11,37 +11,38 @@
 namespace Kdyby\Tests\Components\Grinder\Fixtures;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 use Kdyby;
 use Nette;
 
 
 
 /**
- * @Orm:Entity()
+ * @ORM\Entity()
  * @author Filip Procházka <filip.prochazka@kdyby.org>
  */
 class RootEntity extends Kdyby\Doctrine\Entities\IdentifiedEntity
 {
 
 	/**
-	 * @Orm:Column(type="string")
+	 * @ORM\Column(type="string")
 	 */
 	public $name;
 
 	/**
-	 * @Orm:ManyToOne(targetEntity="RelatedEntity", cascade={"persist"})
+	 * @ORM\ManyToOne(targetEntity="RelatedEntity", cascade={"persist"})
 	 * @var \Kdyby\Tests\Components\Grinder\Fixtures\RelatedEntity
 	 */
 	public $daddy;
 
 	/**
-	 * @Orm:OneToMany(targetEntity="RelatedEntity", mappedBy="daddy", cascade={"persist"})
+	 * @ORM\OneToMany(targetEntity="RelatedEntity", mappedBy="daddy", cascade={"persist"})
 	 * @var \Kdyby\Tests\Components\Grinder\Fixtures\RelatedEntity[]
 	 */
 	public $children;
 
 	/**
-	 * @Orm:ManyToMany(targetEntity="RelatedEntity", inversedBy="buddies", cascade={"persist"})
+	 * @ORM\ManyToMany(targetEntity="RelatedEntity", inversedBy="buddies", cascade={"persist"})
 	 * @var \Kdyby\Tests\Components\Grinder\Fixtures\RelatedEntity[]
 	 */
 	public $buddies;

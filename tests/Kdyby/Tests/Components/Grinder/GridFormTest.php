@@ -24,12 +24,12 @@ class GridFormTest extends Kdyby\Tests\OrmTestCase
 
 	public function testRecordIds()
 	{
-		$form = new GridForm($this->mockDoctrine());
-
 		$grid = $this->mockGrid('getItemsPerPage');
 		$grid->expects($this->once())
 			->method('getItemsPerPage')
 			->will($this->returnValue(20));
+
+		$form = new GridForm($this->mockDoctrine(), $grid);
 		$form->setParent($grid, 'form');
 
 		$form->setRecordIds($ids = range(1, 40, 2));
@@ -62,7 +62,7 @@ class GridFormTest extends Kdyby\Tests\OrmTestCase
 			->disableOriginalConstructor()
 			->getMock();
 
-		return $this->getMock('Kdyby\Components\Grinder\Grid', (array)$methods, array($qb, $doctrine));
+		return $this->getMock('Kdyby\Components\Grinder\Grid', (array)$methods, array($doctrine, $qb));
 	}
 
 }

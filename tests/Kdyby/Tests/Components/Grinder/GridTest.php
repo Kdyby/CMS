@@ -104,7 +104,7 @@ class GridTest extends Kdyby\Tests\OrmTestCase
 			->createQueryBuilder('e');
 
 		/** @var \PHPUnit_Framework_MockObject_MockObject|\Kdyby\Components\Grinder\Grid $grid */
-		$grid = $this->getMock('Kdyby\Components\Grinder\Grid', array('configure', 'configureFilters'), array($qb, $this->getDoctrine()));
+		$grid = $this->getMock('Kdyby\Components\Grinder\Grid', array('configure', 'configureFilters'), array($this->getDoctrine(), $qb));
 		$grid->expects($this->once())
 			->method('configure')
 			->with($this->isInstanceOf('Nette\Application\UI\Presenter'));
@@ -175,6 +175,7 @@ class GridTest extends Kdyby\Tests\OrmTestCase
 
 	public function testGetIterator_alwaysReturnsSameInstance()
 	{
+		$this->attachToPresenter($this->grid);
 		$iterator = $this->grid->getIterator();
 		$this->assertSame($iterator, $this->grid->getIterator());
 	}

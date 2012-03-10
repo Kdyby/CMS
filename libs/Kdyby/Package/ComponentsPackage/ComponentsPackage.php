@@ -24,8 +24,9 @@ class ComponentsPackage extends Kdyby\Packages\Package
 	/**
 	 * @param \Nette\Config\Configurator $config
 	 * @param \Nette\Config\Compiler $compiler
+	 * @param \Kdyby\Packages\PackagesContainer $packages
 	 */
-	public function compile(Nette\Config\Configurator $config, Nette\Config\Compiler $compiler)
+	public function compile(Nette\Config\Configurator $config, Nette\Config\Compiler $compiler, Kdyby\Packages\PackagesContainer $packages)
 	{
 		// Kdyby Components
 		$compiler->addExtension('kc', new DI\ComponentsExtension);

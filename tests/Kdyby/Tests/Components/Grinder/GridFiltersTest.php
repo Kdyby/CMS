@@ -176,7 +176,7 @@ class GridFiltersTest extends Kdyby\Tests\TestCase
 			->getMock();
 
 		$qb = $this->mockQueryBuilder();
-		$grid = $this->getMock('Kdyby\Components\Grinder\Grid', array(), array($qb, $doctrine));
+		$grid = $this->getMock('Kdyby\Components\Grinder\Grid', array(), array($doctrine, $qb));
 
 		$grid->expects($this->any())
 			->method('isColumnNameValid')

@@ -151,7 +151,9 @@ class Grid extends Kdyby\Application\UI\Control implements \IteratorAggregate, \
 		}
 
 		// macros
-		$context = $this->getPresenter()->getContext();
+		if (!$context = $this->getPresenter()->getContext()) {
+			throw new Kdyby\UnexpectedValueException("Presenter does not provide a DI Container.");
+		}
 		$this->setTemplateConfigurator($context->kdyby->templateConfigurator);
 
 		// load state

@@ -11,7 +11,7 @@
 namespace Kdyby\Components\Grinder;
 
 use Doctrine;
-use DoctrineExtensions\Paginate\Paginate;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Kdyby;
 use Kdyby\Doctrine\QueryBuilder;
 use Nette;
@@ -49,12 +49,12 @@ class GridIterator extends \IteratorIterator
 		$grid->getFilters()->apply($queryBuilder);
 
 		// count pages
-		$countQuery = Paginate::createCountQuery($queryBuilder->getQuery());
+		$paginator = new Paginator($queryBuilder);
 		try {
-			$this->grid->getPaginator()->setItemCount($countQuery->getSingleScalarResult());
+			$this->grid->getPaginator()->setItemCount($paginator->count());
 
 		} catch (Doctrine\ORM\ORMException $e) {
-			throw new Kdyby\Doctrine\QueryException($e, $countQuery, $e->getMessage());
+			throw new Kdyby\Doctrine\QueryException($e, $paginator->getQuery(), $e->getMessage());
 		}
 
 		// set limit & offset
@@ -70,7 +70,7 @@ class GridIterator extends \IteratorIterator
 			parent::__construct(new \ArrayIterator($this->items = $query->execute()));
 
 		} catch (Doctrine\ORM\ORMException $e) {
-			throw new Kdyby\Doctrine\QueryException($e, $countQuery, $e->getMessage());
+			throw new Kdyby\Doctrine\QueryException($e, $query, $e->getMessage());
 		}
 
 		// items ids to form

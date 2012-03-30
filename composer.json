@@ -13,6 +13,12 @@
 		"php" : ">=5.3.2",
 		"kdyby/framework" : "dev-master"
 	},
+	"repositories": [
+        {
+            "type": "vcs",
+            "url": "git://github.com/HosipLan/nette.git"
+        }
+    ],
 	"autoload": {
         "psr-0": {"Kdyby": "libs/"}
     },

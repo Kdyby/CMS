@@ -14,7 +14,7 @@
         "kdyby/framework" : "dev-master"
     },
     "replace":{
-        "kdyby/cms-component": "self.version"
+        "kdyby/header-component": "self.version"
     },
     "repositories": [
         {

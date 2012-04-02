@@ -11,7 +11,7 @@
 namespace Kdyby\Components\Header;
 
 use Kdyby;
-use Kdyby\Assets\FormulaeManager;
+use Kdyby\Extension\Assets\FormulaeManager;
 use Nette;
 use Nette\Http;
 use Nette\Application\Application;
@@ -43,7 +43,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	/** @var \Nette\Utils\Html */
 	private $titleEl;
 
-	/** @var \Kdyby\Assets\FormulaeManager */
+	/** @var \Kdyby\Extension\Assets\FormulaeManager */
 	private $formulaeManager;
 
 	/** @var string */
@@ -71,7 +71,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 
 	/**
 	 * @param \Nette\Application\Application $application
-	 * @param \Kdyby\Assets\FormulaeManager $formulaeManager
+	 * @param \Kdyby\Extension\Assets\FormulaeManager $formulaeManager
 	 * @param \Nette\Http\Request $httpRequest
 	 */
 	public function __construct(Application $application, FormulaeManager $formulaeManager, Http\Request $httpRequest)
@@ -79,6 +79,7 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 		$this->formulaeManager = $formulaeManager;
 		$this->httpRequest = $httpRequest;
 		$application->onShutdown[] = function () use ($formulaeManager) {
+			/** @var \Kdyby\Extension\Assets\FormulaeManager $formulaeManager */
 			$formulaeManager->publish();
 		};
 
@@ -178,6 +179,8 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 
 	/**
 	 * @param array $meta
+	 *
+	 * @throws \Kdyby\InvalidArgumentException
 	 */
 	public function addMeta(array $meta)
 	{

@@ -25,13 +25,7 @@ class ComponentsExtension extends Kdyby\Config\CompilerExtension
 	 */
 	public function loadConfiguration()
 	{
-		$container = $this->getContainerBuilder();
-
-		$container->addDefinition('cms_headerControl')
-			->setClass('Kdyby\Components\Header\HeaderControl', array('@application', '@assetic.formulaeManager'));
-
-		$this->addMacro('macro_head', 'Kdyby\Components\Header\HeadMacro::install');
-		$this->addMacro('macros_grid', 'Kdyby\Components\Grinder\Latte\GrinderMacroSet::install');
+		$this->addMacro('macrosGrid', 'Kdyby\Components\Grinder\Latte\GrinderMacroSet::install');
 	}
 
 }

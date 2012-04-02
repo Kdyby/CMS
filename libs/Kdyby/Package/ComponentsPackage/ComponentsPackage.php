@@ -29,6 +29,7 @@ class ComponentsPackage extends Kdyby\Packages\Package
 	public function compile(Nette\Config\Configurator $config, Nette\Config\Compiler $compiler, Kdyby\Packages\PackagesContainer $packages)
 	{
 		// Kdyby Components
+		$compiler->addExtension('header', new Kdyby\Components\Header\DI\HeaderExtension());
 		$compiler->addExtension('kc', new DI\ComponentsExtension);
 	}
 

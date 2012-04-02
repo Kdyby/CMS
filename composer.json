@@ -1,30 +1,28 @@
 {
-	"name": "kdyby/cms",
-	"description": "Kdyby CMS - Component Management System",
-	"keywords": ["framework", "nette", "doctrine", "cms"],
-	"homepage": "http://kdyby.org",
-	"authors": [
-		{
-			"name": "Filip Procházka",
-			"homepage": "http://filip-prochazka.com"
-		}
-	],
-	"require": {
-		"php" : ">=5.3.2",
-		"kdyby/framework" : "dev-master"
-	},
-	"repositories": [
+    "name": "kdyby/cms",
+    "description": "Kdyby CMS - Component Management System",
+    "keywords": ["framework", "nette", "doctrine", "cms"],
+    "homepage": "http://kdyby.org",
+    "authors": [
+        {
+            "name": "Filip Procházka",
+            "homepage": "http://filip-prochazka.com"
+        }
+    ],
+    "require": {
+        "php" : ">=5.3.2",
+        "kdyby/framework" : "dev-master"
+    },
+    "replace":{
+        "kdyby/cms-component": "self.version"
+    },
+    "repositories": [
         {
             "type": "vcs",
             "url": "git://github.com/HosipLan/nette.git"
         }
     ],
-	"autoload": {
+    "autoload": {
         "psr-0": {"Kdyby": "libs/"}
-    },
-	"extra": {
-		"branch-alias": {
-			"dev-master": "2.1-dev"
-		}
-	}
+    }
 }

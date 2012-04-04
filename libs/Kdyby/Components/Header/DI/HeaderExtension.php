@@ -28,7 +28,7 @@ class HeaderExtension extends Nette\Config\CompilerExtension
 		$builder = $this->getContainerBuilder();
 
 		$builder->addDefinition($this->prefix('control'))
-			->setClass('Kdyby\Components\Header\HeaderControl', array('@application', '@assets.formulaeManager'));
+			->setClass('Kdyby\Components\Header\HeaderControl');
 
 		$builder->getDefinition('nette.latte')
 			->addSetup('Kdyby\Components\Header\HeadMacro::install(?->compiler)', array('@self'));

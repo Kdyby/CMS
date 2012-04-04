@@ -205,11 +205,11 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 			return $this->addTag($favicon);
 		}
 
-		$faviconEl = Html::el('link')
-			->rel('shortcut icon')
-			->href($this->absolutePath($favicon))
-			->type('image/x-icon');
-		return $this->addTag($faviconEl);
+		return $this->addTag(Html::el('link', array(
+			'rel' => 'shortcut icon',
+			'href' => $this->absolutePath($favicon),
+			'type' => 'image/x-icon'
+		)));
 	}
 
 
@@ -272,10 +272,12 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 
 		$fm = $this->formulaeManager;
 		foreach ($fm->getAssets(FormulaeManager::TYPE_STYLESHEET) as $style) {
-			$el = Html::el('link')->href($style['src'])->type('text/css');
-			$el->rel(isset($style['rel']) ? $style['rel'] : 'stylesheet');
-			$el->media(isset($style['media']) ? $style['media'] : 'screen,projection,tv');
-			$head->add($el);
+			$head->add(Html::el('link', array(
+				'href' => $style['src'],
+				'type' => 'text/css',
+				'rel' => isset($style['rel']) ? $style['rel'] : 'stylesheet',
+				'media' => isset($style['media']) ? $style['media'] : 'screen,projection,tv'
+			)));
 		}
 
 		$this->renderedAssets[FormulaeManager::TYPE_STYLESHEET] = TRUE;
@@ -297,7 +299,10 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 
 		$fm = $this->formulaeManager;
 		foreach ($fm->getAssets(FormulaeManager::TYPE_JAVASCRIPT) as $script) {
-			$head->add(Html::el('script')->src($script['src'])->type('text/javascript'));
+			$head->add(Html::el('script', array(
+				'src' => $script['src'],
+				'type' => 'text/javascript'
+			)));
 		}
 
 		// inline assets captured from template should be executed at the end

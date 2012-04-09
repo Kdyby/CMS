@@ -90,6 +90,16 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 
 
 	/**
+	 * @return \Kdyby\Extension\Assets\FormulaeManager
+	 */
+	public function getFormulaeManager()
+	{
+		return $this->formulaeManager;
+	}
+
+
+
+	/**
 	 * @return string
 	 */
 	protected function getBaseUrl()

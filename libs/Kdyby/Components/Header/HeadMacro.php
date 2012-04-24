@@ -41,7 +41,12 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 	 */
 	public static function install(Latte\Compiler $compiler)
 	{
-		$compiler->addMacro('head', $me = new static($compiler));
+		$me = new static($compiler);
+		$compiler->addMacro('head', $me);
+
+		$compiler->addMacro('javascript', $me);
+		$compiler->addMacro('js', $me);
+
 		return $me;
 	}
 
@@ -68,7 +73,7 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 		$epilog = $this->epilog;
 		$this->prolog = $this->epilog = array();
 		return array(
-			implode("\n", $prolog) . "\n" . '$_g->kdyby->captureAssets = TRUE;', // inline assets will not be printed out
+			implode("\n", $prolog),
 			implode("\n", $epilog)
 		);
 	}
@@ -82,6 +87,17 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 	 */
 	public function nodeOpened(Latte\MacroNode $node)
 	{
+		if (in_array($node->name, array('js', 'javascript'))) {
+			if (($node->data->inline = empty($node->args)) && $node->htmlNode) {
+				$node->data->type = in_array($node->name, array('js', 'javascript')) ? 'js' : 'css';
+				$node->openingCode = '<?php ob_start(); ?>';
+				return;
+
+			} else {
+				return FALSE;
+			}
+		}
+
 		$node->openingCode = '<?php Kdyby\Components\Header\HeadMacro::documentBegin(); ?>';
 	}
 
@@ -94,15 +110,21 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 	 */
 	public function nodeClosed(Latte\MacroNode $node)
 	{
-		$writer = Latte\PhpWriter::using($node);
-		if ($args = LatteHelpers::readArguments($node->tokenizer, $writer)) {
-			$this->prolog[] = Code\Helpers::formatArgs('Kdyby\Components\Header\HeadMacro::headArgs($presenter, ?);', array($args));
+		if (!empty($node->data->inline)) {
+			$node->closingCode = '<?php ' . get_called_class() . '::tagCaptureEnd($presenter); ?>';
+			return;
 		}
 
-		$this->epilog[] = '$_documentBody = Kdyby\Components\Header\HeadMacro::documentEnd();';
-		$this->epilog[] = 'Kdyby\Components\Header\HeadMacro::headBegin($presenter);';
-		$this->epilog[] = '?> '. $this->wrapTags(Nette\Templating\Helpers::optimizePhp($node->content), $writer) . '<?php';
-		$this->epilog[] = 'Kdyby\Components\Header\HeadMacro::headEnd($presenter);';
+		$class = get_called_class();
+		$writer = Latte\PhpWriter::using($node);
+		if ($args = LatteHelpers::readArguments($node->tokenizer, $writer)) {
+			$this->prolog[] = Code\Helpers::formatArgs($class . '::headArgs($presenter, ?);', array($args));
+		}
+
+		$this->epilog[] = '$_documentBody = ' . $class . '::documentEnd();';
+		$this->epilog[] = $class . '::headBegin($presenter); ?>';
+		$this->epilog[] = $this->wrapTags($node->content, $writer);
+		$this->epilog[] = '<?php ' . $class . '::headEnd($presenter);';
 		$this->epilog[] = 'echo $_documentBody;';
 
 		$node->content = NULL;
@@ -118,9 +140,9 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 	 */
 	private function wrapTags($content, Latte\PhpWriter $writer)
 	{
-		return LatteHelpers::wrapTags($content,
+		return LatteHelpers::wrapTags(Nette\Templating\Helpers::optimizePhp($content),
 			$writer->write('<?php ob_start(); ?>'),
-			$writer->write('<?php Kdyby\Components\Header\HeadMacro::tagCaptureEnd($presenter); ?>')
+			$writer->write('<?php ' . get_called_class() . '::tagCaptureEnd($presenter); ?>')
 		);
 	}
 
@@ -172,7 +194,8 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 	 */
 	public static function tagCaptureEnd(UI\Presenter $presenter)
 	{
-		$tag = Nette\Utils\Html::el(substr(ob_get_clean(), 1));
+		$content = ob_get_clean();
+		$tag = Nette\Utils\Html::el(substr($content, 1, ($i = strpos($content, '>')) ? $i-1 : NULL));
 		$head = static::getHead($presenter);
 
 		if ($tag->getName() === 'meta') {
@@ -181,6 +204,9 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 		} elseif ($tag->getName() === 'link' && $tag->attrs['rel'] === 'shortcut icon') {
 			$head->setFavicon($tag);
 
+		} elseif ($tag->getName() === 'script') {
+			$head->addAssetSource('js', $content);
+
 		} else {
 			$head->addTag($tag);
 		}
@@ -188,17 +214,27 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 
 
 
+	/************************ Helpers ************************/
+
+
 	/**
-	 * @param \Nette\ComponentModel\Container $component
+	 * @param \Nette\Application\UI\PresenterComponent $control
 	 * @return \Kdyby\Components\Header\HeaderControl
+	 * @throws \Kdyby\InvalidStateException
 	 */
-	private static function getHead(Nette\ComponentModel\Container $component)
+	private static function getHead(Nette\Application\UI\PresenterComponent $control)
 	{
-		if (!$component->getComponent('head', FALSE)) {
-			throw new Kdyby\InvalidStateException('You have to register Kdyby\Components\Header\HeaderControl as presenter component named "head".');
+		/** @var \Nette\Application\UI\Presenter $presenter */
+		$presenter = $control->getPresenter();
+		$components = $presenter->getComponents(FALSE, 'Kdyby\Components\Header\HeaderControl');
+		if (!$headerControl = iterator_to_array($components)) {
+			throw new Kdyby\InvalidStateException(
+				'Please register Kdyby\Components\Header\HeaderControl as component in presenter.' .
+				'If you have the component registered and this error keeps returning, try to instantiate it manually.'
+			);
 		}
 
-		return $component->getComponent('head');
+		return reset($headerControl);
 	}
 
 

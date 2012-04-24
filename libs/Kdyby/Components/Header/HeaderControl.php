@@ -25,47 +25,83 @@ use Nette\Utils\Html;
 class HeaderControl extends Nette\Object implements Nette\ComponentModel\IComponent
 {
 
-	/** @var string */
+	/**
+	 * @var string
+	 */
 	public $defaultTitle;
 
-	/** @var bool */
+	/**
+	 * @var bool
+	 */
 	public $titleReverse = FALSE;
 
-	/** @var string */
+	/**
+	 * @var string
+	 */
 	public $titleSeparator = '-';
 
-	/** @var array */
+	/**
+	 * @var array
+	 */
 	private $title = array();
 
-	/** @var \Nette\Utils\Html */
+	/**
+	 * @var \Nette\Utils\Html
+	 */
 	private $headEl;
 
-	/** @var \Nette\Utils\Html */
+	/**
+	 * @var \Nette\Utils\Html
+	 */
 	private $titleEl;
 
-	/** @var \Kdyby\Extension\Assets\FormulaeManager */
+	/**
+	 * @var \Kdyby\Extension\Assets\FormulaeManager
+	 */
 	private $formulaeManager;
 
-	/** @var string */
+	/**
+	 * @var string
+	 */
 	private $httpRequest;
 
-	/** @var \Nette\Utils\Html[] */
+	/**
+	 * @var \Nette\Utils\Html[]
+	 */
 	private $htmlTags = array();
 
-	/** @var array */
+	/**
+	 * @var array
+	 */
 	private $meta = array(
 		'content-type' => array('http-equiv' => 'Content-Type', 'content' => 'text/html; charset=utf-8'),
 		// 'robots' => array('name' => 'robots', 'content' => 'noindex')
 	);
 
-	/** @var \Kdyby\Application\UI\Presenter */
+	/**
+	 * @var \Kdyby\Application\UI\Presenter
+	 */
 	private $parent;
 
-	/** @var array */
+	/**
+	 * @var array
+	 */
 	private $renderedAssets = array();
 
-	/** @var string */
+	/**
+	 * @var array
+	 */
+	private $capturedAssets = array();
+
+	/**
+	 * @var string
+	 */
 	private $name;
+
+	/**
+	 * @var bool
+	 */
+	private $published = FALSE;
 
 
 
@@ -78,10 +114,6 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	{
 		$this->formulaeManager = $formulaeManager;
 		$this->httpRequest = $httpRequest;
-		$application->onShutdown[] = function () use ($formulaeManager) {
-			/** @var \Kdyby\Extension\Assets\FormulaeManager $formulaeManager */
-			$formulaeManager->publish();
-		};
 
 		$this->headEl = Html::el('head');
 		$this->titleEl = Html::el('title');
@@ -241,6 +273,17 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 
 
 	/**
+	 * @param string $type
+	 * @param string $source
+	 */
+	public function addAssetSource($type, $source)
+	{
+		$this->capturedAssets[$type][] = $source;
+	}
+
+
+
+	/**
 	 * @param \Nette\Utils\Html $head
 	 *
 	 * @return \Nette\Utils\Html
@@ -276,6 +319,11 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 */
 	protected function buildStyles(Html $head)
 	{
+		if (!$this->published) {
+			$this->formulaeManager->publish();
+			$this->published = TRUE;
+		}
+
 		if (!empty($this->renderedAssets[FormulaeManager::TYPE_STYLESHEET])) {
 			return $head;
 		}
@@ -303,6 +351,11 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 	 */
 	protected function buildScripts(Html $head)
 	{
+		if (!$this->published) {
+			$this->formulaeManager->publish();
+			$this->published = TRUE;
+		}
+
 		if (!empty($this->renderedAssets[FormulaeManager::TYPE_JAVASCRIPT])) {
 			return $head;
 		}
@@ -316,9 +369,8 @@ class HeaderControl extends Nette\Object implements Nette\ComponentModel\ICompon
 		}
 
 		// inline assets captured from template should be executed at the end
-		$globals = $this->parent->getTemplate()->_g;
-		if (isset($globals->kdyby->assets['js'])) {
-			foreach ($globals->kdyby->assets['js'] as $inlineJs) {
+		if (isset($this->capturedAssets['js'])) {
+			foreach ($this->capturedAssets['js'] as $inlineJs) {
 				$head->add(Html::el()->setHtml($inlineJs));
 			}
 		}

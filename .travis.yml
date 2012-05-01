@@ -1,0 +1,14 @@
+language: php
+
+php:
+  - 5.3
+  - 5.4
+
+env:
+  - DB=sqlite
+
+before_script:
+  - "sh -c 'curl -s http://getcomposer.org/installer | php'"
+  - "sh -c 'php composer.phar install --quiet'"
+
+script: phpunit

@@ -184,7 +184,7 @@ class HeadMacro extends Nette\Object implements Latte\IMacro
 	public static function headEnd(UI\Presenter $presenter)
 	{
 		$head = static::getHead($presenter);
-		echo $head->getElement()->startTag();
+		echo $head->getElement()->endTag();
 	}
 
 
